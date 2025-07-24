@@ -1,0 +1,42 @@
+.mat-tab-group{
+    /* background-color: black; */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black !important;
+}
+
+.mat-tab{
+    width: 1000px !important;
+}
+
+
+.custom-tab-text {
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: black;
+    background-color: transparent;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-bottom: 2px solid #566573;
+    color: #566573;
+}
+
+.nav-tabs .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    color: #566573;
+}
+
+.tab-content {
+    background-color: inherit;
+}
+
+
+
+
+

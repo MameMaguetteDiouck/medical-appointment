@@ -1,0 +1,8 @@
+div div form button:hover{
+    background-color: #566573;
+    color: white;
+}
+div div form button{
+    background-color: rgba(50, 53, 54, 0.274);
+    color: black;
+}

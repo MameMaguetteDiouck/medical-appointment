@@ -1,0 +1,70 @@
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="text-center col-lg-8 col-sm-8 col-xs-12 card border-black p-3">
+        <h2 class="text-primary">Inscription dans Medico</h2>
+        <form class="example-form" [formGroup]="authForm" (ngSubmit)="onSubmit()">
+            <div class="d-flex justify-content-between">
+                <mat-form-field appearance="outline" class="w-50 me-2 d-block">
+                    <mat-label>Prénom</mat-label>
+                    <input matInput formControlName="firstName">
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-50 ms-2 d-block">
+                    <mat-label>Nom</mat-label>
+                    <input matInput formControlName="lastName">
+                </mat-form-field>
+            </div>
+            <div class="d-flex">
+                <mat-form-field appearance="outline" class="w-50 me-2 d-block">
+                    <mat-label>Email</mat-label>
+                    <input matInput formControlName="email">
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-50 ms-2 d-block">
+                    <mat-label>Téléphone</mat-label>
+                    <input matInput formControlName="phone">
+                </mat-form-field>
+            </div>
+            <div class="d-flex">
+                <mat-form-field appearance="outline" class="w-50 me-2 d-block">
+                    <mat-label>Date de Naissance</mat-label>
+                    <input type="date" matInput formControlName="birthDate">
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-50 ms-2 d-block">
+                    <mat-label>Addresse</mat-label>
+                    <input matInput formControlName="address">
+                </mat-form-field>
+            </div>
+            <div class="d-flex">
+                <mat-form-field class="example-full-width w-100" appearance="outline">
+                    <mat-label>Parlez-nous de toi (tes malades, tes antécédants, etc...)</mat-label>
+                    <textarea matInput placeholder="Exemple: je souffrai ..." formControlName="description"></textarea>
+                </mat-form-field>
+            </div>
+            <div class="d-flex">
+                <mat-form-field appearance="outline" class="w-50 me-2 d-block">
+                    <mat-label>Mot de Pass</mat-label>
+                    <input matInput type="password" formControlName="password">
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-50 ms-2 d-block">
+                    <mat-label>Confirmation de Mot de Pass</mat-label>
+                    <input matInput type="password" formControlName="passwordConfirmed">
+                </mat-form-field>
+            </div>
+            <!-- Error Message -->
+            <div class="alert alert-danger p2 d-flex align-items-center" *ngIf="errorMessage ">
+                <mat-icon>info</mat-icon>
+                {{errorMessage}}
+            </div>
+
+            <!-- In progess -->
+            <div class="d-flex align-items-center" *ngIf="isSubmissionInProgress">
+                <mat-spinner [diameter]="22"></mat-spinner>
+                Connexion en cours...
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
+                <button type="submit" mat-raised-button class="w-50 d-block mb-2 sign">Inscription</button>
+            </div>
+        </form>
+        <div class="d-flex justify-content-center align-items-center">
+            <button mat-raised-button class="w-50 p-2 mt-2 d-lg-block sign" [routerLink]="['/auth/sign-in']">J'ai déjà un compte?</button>
+        </div>
+    </div>
+</div>

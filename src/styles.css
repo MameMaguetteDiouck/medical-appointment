@@ -1,1 +1,63 @@
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
 /* You can add global styles to this file, and also import other style files */
+
+
+body {
+    font-family: Roboto, "Helvetica Neue", sans-serif;
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+}
+.couleur{
+    background-color: #566573 !important;
+}
+.color{
+    color: #566573 !important;
+}
+nav{
+    min-height: 55px;
+}
+
+.sign {
+    color: #566573 !important;
+    background-color: white !important;
+}
+
+.sign:hover {
+    background-color: #586c7e !important;
+    color: #2b2d2e !important;
+}
+
+
+.main{
+    min-height: calc(100vh - 130px) !important;
+    text-align: center;
+    flex: 1;
+}
+
+.colorTextMain{
+    color: #566573 !important;
+    text-decoration-color: #566573 !important;
+}
+
+
+/* footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    height: 75px;
+} */
+
+footer {
+    width: 100%;
+    text-align: center;
+    box-sizing: border-box;
+    height: 75px;
+    padding-bottom: 2px;
+}

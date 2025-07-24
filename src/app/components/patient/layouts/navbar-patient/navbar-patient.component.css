@@ -1,0 +1,29 @@
+nav, .navig{
+    background-color: #566573;
+}
+
+nav div div form button{
+    text-decoration-color: #566573;
+    color: #566573;
+    background-color: white;
+}
+nav div div form button:hover{
+    border: 1px solid white;
+    text-decoration-color: #566573;
+    background-color: #566573;
+    color: white;
+}
+
+nav div div form input{
+    text-decoration-color: #566573;
+    color: #566573;
+    background-color: white;
+}
+
+nav div a, nav div div ul li a{
+    color: white;
+}
+
+nav div a:hover, nav div div ul li a:hover{
+    color: black;
+}

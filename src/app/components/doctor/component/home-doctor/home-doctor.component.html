@@ -1,0 +1,88 @@
+<app-navbar-doctor></app-navbar-doctor>
+
+<div class="main">
+    <div class="container text-center d-flex flex-column mt-5">
+        <h2 class="color">Mes Rendez-vous d'aujourd'hui</h2>
+
+        <div class="w-100">
+            <h2 class="m-3">Les rendez-vous confimé</h2>
+            <mat-accordion class="w-100">
+                <mat-expansion-panel class="mb-2" *ngFor="let appointment of allAppointmentForToday"
+                    (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
+                                {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
+                            </ng-container>
+                        </mat-panel-title>
+                        <mat-panel-description>
+                            Détails {{panelOpenState() ? 'Ouverts' : 'fermés'}}
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <p>Date: {{appointment.day}}</p>
+                    <p>Heure du rv: {{appointment.hourStart}}</p>
+                    <p>{{appointment.descriptionSick}}</p>
+                    <div class="mb-3 w-100 d-flex flex-column alert alert-danger" *ngIf="errorMessage">
+                        {{errorMessage}}
+                    </div>
+                    <button type="button" class="btn btn-success me-2" data-bs-toggle="modal"
+                        [attr.data-bs-target]="'#confirmedAppointment-' + appointment.id">
+                        Confirmer le rendez-vous
+                    </button>
+
+                    <!-- Modal Confirmed-->
+                    <div class="modal fade" [id]="'confirmedAppointment-' + appointment.id" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content couleur text-white">
+                                <div class="modal-header text-white">
+                                    <h2 class="modal-title" id="exampleModalLongTitle">Confirmation du rv</h2>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div>
+                                        Voulez-vous confirmer ce rendez-vous de
+                                        <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
+                                            {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
+                                        </ng-container> ??!!
+                                    </div>
+
+                                    <form [formGroup]="appointmentForm">
+                                        <div class="mb-3 w-100 d-flex flex-column">
+                                            <label class="form-label">doctorObservation</label>
+                                            <textarea matInput formControlName="doctorObservation"></textarea>
+                                        </div>
+                                        <div formArrayName="ordonnance" class="mb-3 d-flex flex-column">
+                                            <div *ngFor="let medocCtrl of ordonnance.controls; let i = index">
+                                                <label>Médicament {{ i + 1 }}</label>
+                                                <input type="text" [formControlName]="i" class="form-control" />
+
+                                                <button type="button" (click)="removeMedoc(i)"
+                                                    class="btn btn-danger btn-sm mt-1">
+                                                    Supprimer
+                                                </button>
+                                            </div>
+
+                                            <button type="button" (click)="addMedoc()" class="btn btn-primary mt-2">
+                                                + Ajouter un médicament
+                                            </button>
+                                        </div>
+
+                                    </form>
+                                    <button type="button" class="btn btn-secondary me-2"
+                                        data-bs-dismiss="modal">Fermer</button>
+                                    <button type="button" class="btn btn-primary me-2" data-bs-dismiss="modal"
+                                        (click)="handleConfirmClick(appointment.id)">
+                                        Confirmer
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+    </div>
+</div>
+
+<app-footer-doctor></app-footer-doctor>

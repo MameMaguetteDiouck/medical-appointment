@@ -1,0 +1,155 @@
+nav, .navig{
+    background-color: #566573;
+}
+
+nav div div form button{
+    text-decoration-color: #566573;
+    color: #566573;
+    background-color: white;
+}
+nav div div form button:hover{
+    border: 1px solid white;
+    text-decoration-color: #566573;
+    background-color: #566573;
+    color: white;
+}
+
+nav div div form input{
+    text-decoration-color: #566573;
+    color: #566573;
+    background-color: white;
+}
+
+nav div a, nav div div ul li a{
+    color: white;
+}
+
+nav div a:hover, nav div div ul li a:hover{
+    color: black;
+}
+
+section{
+    text-align: center;
+    padding-top: 30px;
+    padding-bottom: 30px;
+}
+section h2{
+    color: #566573;
+}
+
+#home{
+    background-image: url('/img/home-bg.jpg');
+    min-height: 300px;
+    background-size: cover;
+    background-repeat: no-repeat;
+    /* background-position: center; */
+}
+
+#home div{
+    padding: 70px;
+}
+
+#home div h1{
+    font-size: 3rem;
+    margin-bottom: 25px;
+}
+
+#about{
+    /* background-color: red; */
+    max-height: 100vh;
+}
+#about div{
+    /* background-color: red; */
+    min-width: 50% !important;
+    margin-left: 20px;
+}
+
+#about div div{
+    padding: 20px 10px;
+}
+#about div div{
+    font-size: 1.1rem;
+    color: #566573;
+}
+#about div div p{
+    font-size: 1.1rem;
+    color: #566573;
+}
+
+#doctors div div div p,h5{
+    font-size: 1.1rem;
+    color: #566573;
+}
+
+#contacts div form .button:hover{
+    background-color: #566573;
+    color: white !important;
+}
+#contacts div form input{
+    border: 1px solid #566573;
+    text-align: center;
+    height: 40px;
+    font-size: 1.1rem;
+    padding-left: 10px;
+    border-radius: 10px;
+    margin: 10px;
+}
+#contacts div form textarea{
+    border: 1px solid #566573;
+    text-align: center;
+    padding-top: 10px;
+    height: 100px;
+    font-size: 1.1rem;
+    margin: 10px;
+    border-radius: 10px;
+}
+
+
+div .bi-arrow-up-square{
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 50px;
+    /* background-color: darkblue; */
+    height: 50px;
+    font-size: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #566573;
+    margin: 0;
+    text-decoration: none;
+    z-index: 1000;
+}
+
+div .bi-arrow-up-square:hover{
+    background-color: #566573;
+    color: white;
+}
+
+@media (max-width: 700px) {
+    #about{
+        background-color: white;
+    }
+    #about div{
+        flex-direction: column;
+    }
+    #about div div{
+        min-width: 700px !important;
+        height: 50vh;
+    }
+
+    #home div h1{
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+
+    #contacts{
+        display: flex;
+        flex-direction: column;
+
+    }
+    #contacts div{
+        width: 100% !important;
+    }
+}
