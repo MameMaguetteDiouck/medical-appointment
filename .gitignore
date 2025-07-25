@@ -47,4 +47,10 @@ Thumbs.db
 .runtimeconfig.json
 
 
+.editorconfig
+angular.json
+firebase.json
+package-lock.json
+package.json
+
 *.json
