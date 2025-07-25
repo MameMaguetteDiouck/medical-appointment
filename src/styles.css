@@ -58,6 +58,6 @@ footer {
     width: 100%;
     text-align: center;
     box-sizing: border-box;
-    height: 75px;
+    min-height: 75px;
     padding-bottom: 2px;
 }

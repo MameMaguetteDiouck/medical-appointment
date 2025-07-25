@@ -42,6 +42,18 @@ export class AppointmentService {
     const data = this.sortAppointmentsByDateDesc(appointments);
     return data;
   }
+  async allAppointmentForOneDoctor(id: string): Promise<Appointment[]> {
+    const q = query(this.appointmentRef, where('doctorId', '==', id));
+    const snapshot = await getDocs(q);
+
+    const appointments = snapshot.docs.map(docSnap => {
+      const appointment = docSnap.data() as Appointment;
+      appointment.id = docSnap.id;
+      return appointment;
+    });
+    const data = this.sortAppointmentsByDateDesc(appointments);
+    return data;
+  }
 
   sortAppointmentsByDateDesc(appointments: Appointment[]): Appointment[] {
     return appointments.sort((a, b) => {
@@ -111,11 +123,14 @@ export class AppointmentService {
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(docSnap => {
+    const appointments = snapshot.docs.map(docSnap => {
       const appt = docSnap.data() as Appointment;
       appt.id = docSnap.id;
       return appt;
     });
+
+    const data = this.sortAppointmentsByDateDesc(appointments);
+    return data;
   }
 
   async getAppointmentsForToday(id: string | null): Promise<Appointment[]> {
@@ -130,11 +145,14 @@ export class AppointmentService {
     );
 
     const snapshot = await getDocs(q);
-    return snapshot.docs.map(docSnap => {
+    const appointments = snapshot.docs.map(docSnap => {
       const appt = docSnap.data() as Appointment;
       appt.id = docSnap.id;
       return appt;
     });
+
+    const data = this.sortAppointmentsByDateDesc(appointments);
+    return data;
   }
 
 

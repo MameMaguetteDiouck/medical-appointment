@@ -53,13 +53,13 @@ export class ValidateAppointementComponent {
       day: [appointment.date, Validators.required],
       hourStart: [appointment.hourStart, Validators.required],
       doctorId: [appointment.doctorId, Validators.required],
-      status: ['Confirmé', Validators.required]
+      status: ['Confirmé', Validators.required],
+      service: [appointment.service, Validators.required]
     });
 
     this.availableDoctors = [];
   }
   async startLoad() {
-
     // Charger la liste des doctors
     this.doctorService.getAllDoctors().then(doctors => {
       this.allDoctors = doctors;
@@ -178,7 +178,7 @@ export class ValidateAppointementComponent {
     const occupiedDoctorIds = rvSameSlot.map(rv => rv.doctorId);
 
     this.availableDoctors = doctorsOfDay.filter(
-      d => !occupiedDoctorIds.includes(d.id)
+      d => !occupiedDoctorIds.includes(d.id) && d.service === this.appointmentForm.get('service')?.value,
     );
   }
 

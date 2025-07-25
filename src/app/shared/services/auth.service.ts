@@ -49,11 +49,6 @@ export class AuthService {
     return this.currentUserSubject.value?.email ?? null;
   }
 
-  /**
-   * Enregistrement :
-   * - Ajoute l’utilisateur dans Firestore (collection patients, doctors, etc.)
-   * - Puis crée le compte Auth Firebase
-   */
   async signUp(email: string, password: string, collectionName: string, data?: any ): Promise<User | null> {
     try {
       if (collectionName != this.doctorRole) {
@@ -79,9 +74,6 @@ export class AuthService {
     }
   }
 
-  /**
-   * Connexion Firebase Auth
-   */
   async signIn(email: string, password: string): Promise<User | null> {
     try {
       const credential = await signInWithEmailAndPassword(
@@ -96,9 +88,6 @@ export class AuthService {
     }
   }
 
-  /**
-   * Déconnexion
-   */
   async logout(): Promise<void> {
     try {
       await signOut(this.auth);
@@ -109,9 +98,6 @@ export class AuthService {
     }
   }
 
-  /**
-   * Récupère le rôle en fonction de l'email
-   */
   async getUserRole(email: string): Promise<string | null> {
     const collections = ['patients', 'doctors', 'secretaries'];
     for (let collectionName of collections) {

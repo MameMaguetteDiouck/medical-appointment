@@ -1,0 +1,78 @@
+<app-navbar-doctor></app-navbar-doctor>
+
+<div class="main">
+    <div class="container text-center d-flex flex-column mt-5">
+        <h2 class="color">Mes Rendez-vous d'aujourd'hui</h2>
+
+        <div class="w-100">
+            <h2 class="m-3">Les rendez-vous confimé</h2>
+            <mat-accordion class="w-100">
+                <mat-expansion-panel class="mb-2" *ngFor="let appointment of allAppointmentCompleted"
+                    (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
+                    <mat-expansion-panel-header>
+                        <mat-panel-title>
+                            <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
+                                {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
+                            </ng-container>
+                        </mat-panel-title>
+                        <mat-panel-description>
+                            Détails {{panelOpenState() ? 'Ouverts' : 'fermés'}}
+                        </mat-panel-description>
+                    </mat-expansion-panel-header>
+                    <p>Date: {{appointment.day}}</p>
+                    <p>Heure du rv: {{appointment.hourStart}}</p>
+                    <p>{{appointment.descriptionSick}}</p>
+                    <div class="mb-3 w-100 d-flex flex-column alert alert-danger" *ngIf="errorMessage">
+                        {{errorMessage}}
+                    </div>
+                    <button type="button" class="btn btn-success me-2" data-bs-toggle="modal"
+                        [attr.data-bs-target]="'#confirmedAppointment-' + appointment.id" (click)="initConfirmForm(appointment)">
+                        Donnez un rendez-vous
+                    </button>
+
+                    <!-- Modal Confirmed-->
+                    <div class="modal fade" [id]="'confirmedAppointment-' + appointment.id" tabindex="-1" role="dialog">
+                        <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content couleur text-white">
+                                <div class="modal-header text-white">
+                                    <h2 class="modal-title" id="exampleModalLongTitle">Confirmation du rv</h2>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div>
+                                        Voulez-vous donner ce rendez-vous à
+                                        <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
+                                            {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
+                                        </ng-container> ??!!
+                                    </div>
+
+                                    <form *ngIf="appointmentForm" [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+                                        <input type="hidden" formControlName="patientId" [value]="appointment.patientId">
+                                        <div class="mb-3">
+                                            <label class="form-label">Date</label>
+                                            <input type="date" class="form-control" formControlName="day">
+                                        </div>
+                                        <div *ngIf="errorMessage!=''">
+                                            <h5>{{errorMessage}}</h5>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Heure</label>
+                                            <input type="time" class="form-control" formControlName="hourStart">
+                                        </div>
+                                        <div class="mb-3">
+                                            <!-- <label class="form-label">Heure</label> -->
+                                            <input type="submit" class="form-control" value="Ajouter" data-bs-dismiss="modal">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </mat-expansion-panel>
+            </mat-accordion>
+        </div>
+    </div>
+</div>
+
+<app-footer-doctor></app-footer-doctor>

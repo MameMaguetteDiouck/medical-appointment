@@ -75,6 +75,10 @@ export class SignInComponent {
           this.isDoctor = true;
           this.welcome = false;
           this.isSubmissionInProgress = false;
+        } else{
+          this.isSubmissionInProgress = false;
+          this.isPatient = true;
+          this.welcome = false;
         }
         return;
       }

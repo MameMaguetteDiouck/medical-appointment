@@ -70,10 +70,9 @@ export class DoctorService {
     }
   }
 
-
   async getDoctorsBySpecialty(specialite: string): Promise<Doctor[]> {
     try {
-      const q = query(this.doctorRef, where('specialite', '==', specialite));
+      const q = query(this.doctorRef, where('service', '==', specialite));
       const snapshot = await getDocs(q);
 
       return snapshot.docs.map(doc => ({
