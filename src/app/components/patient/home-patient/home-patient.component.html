@@ -1,0 +1,33 @@
+<app-navbar-patient></app-navbar-patient>
+<div class="main colorTextMain">
+    <div class="container h-100">
+        <h2 class="mt-5 pt-3">Mes Rendez-Vous</h2>
+        <div class="ms-5 me-5 ">
+            @if (allAppointments.length === 0) {
+                <div class="text-center p-4">
+                    <h2 class="text-muted">Aucun rendez-vous trouvé.</h2>
+                </div>
+            } @else {
+                @for (appointment of allAppointments; track appointment.id) {
+                    <mat-accordion class="rounded-5 fs-6">
+                        <mat-expansion-panel class="mb-3" (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
+                            <mat-expansion-panel-header>
+                                <mat-panel-title class="fs-6">{{appointment.service}}: {{appointment.day}}</mat-panel-title>
+                                <mat-panel-description class="me-4 fs-6">
+                                    Voir les détails? {{panelOpenState() ? 'OUI' : 'plutard'}}
+                                </mat-panel-description>
+                            </mat-expansion-panel-header>
+                            <div class="text-start">
+                                <p class="fs-6 mb-3">Description: {{appointment.descriptionSick}}</p>
+                                <p class="fs-6">Status: {{appointment.status}}</p>
+                                <p class="fs-6" *ngIf="appointment.status !== 'Attente de confirmation'" >Date du RV: {{appointment.day}} à {{appointment.hourStart}}</p>
+                                <p class="fs-6" *ngIf="appointment.status !== 'Attente de confirmation'" >Mot du docteur: {{appointment.doctorObservation}}</p>
+                            </div>
+                        </mat-expansion-panel>
+                    </mat-accordion>
+                }
+            }
+        </div>
+    </div>
+</div>
+<app-footer-patient></app-footer-patient>

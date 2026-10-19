@@ -1,0 +1,73 @@
+<div class="d-flex justify-content-center align-items-center min-vh-100">
+    <div class="text-center col-lg-4 col-sm-8 col-xs-12 card border-black p-3">
+        <h2 class="text-primary">Bienvenue dans Medico</h2>
+        <form *ngIf="welcome" class="example-form" [formGroup]="authForm" (ngSubmit)="onSubmitEmail()">
+            <mat-form-field appearance="outline" class=" d-block">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email">
+            </mat-form-field>
+            <!-- Error Message -->
+            <div class="alert alert-danger p2 d-flex align-items-center" *ngIf="errorMessage ">
+                <mat-icon>info</mat-icon>
+                {{errorMessage}}
+            </div>
+            <!-- In progess -->
+            <div class="d-flex align-items-center" *ngIf="isSubmissionInProgress">
+                <mat-spinner [diameter]="22"></mat-spinner>
+                Connexion en cours...
+            </div>
+            <button type="submit" mat-raised-button class="w-100 mb-2 sign">Soumettre</button>
+        </form>
+        <form *ngIf="isPatient" class="example-form" [formGroup]="authForm" (ngSubmit)="onSubmit()">
+            <mat-form-field appearance="outline" class=" d-block">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="d-block">
+                <mat-label>Mot de Pass</mat-label>
+                <input matInput type="password" formControlName="password">
+            </mat-form-field>
+            <a class="d-flex justify-content-end mb-3" [routerLink]="['/auth/forgot-password']">Mot de pass oublié?</a>
+            <!-- Error Message -->
+            <div class="alert alert-danger p2 d-flex align-items-center" *ngIf="errorMessage ">
+                <mat-icon>info</mat-icon>
+                {{errorMessage}}
+            </div>
+
+            <!-- In progess -->
+            <div class="d-flex align-items-center" *ngIf="isSubmissionInProgress">
+                <mat-spinner [diameter]="22"></mat-spinner>
+                Connexion en cours...
+            </div>
+            <button type="submit" mat-raised-button class="w-100 mb-2 sign">Connexion</button>
+        </form>
+        <form *ngIf="isDoctor" class="example-form" [formGroup]="authForm" (ngSubmit)="onSubmitDoctor()">
+            <mat-form-field appearance="outline" class=" d-block">
+                <mat-label>Email</mat-label>
+                <input matInput formControlName="email">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="d-block">
+                <mat-label>Mot de Pass</mat-label>
+                <input matInput type="password" formControlName="password">
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="d-block">
+                <mat-label>Confirmation du Mot de pass</mat-label>
+                <input matInput type="password" formControlName="passwordConfirmed">
+            </mat-form-field>
+            <a class="d-flex justify-content-end mb-3" [routerLink]="['/auth/forgot-password']">Mot de pass oublié?</a>
+            <!-- Error Message -->
+            <div class="alert alert-danger p2 d-flex align-items-center" *ngIf="errorMessage ">
+                <mat-icon>info</mat-icon>
+                {{errorMessage}}
+            </div>
+
+            <!-- In progess -->
+            <div class="d-flex align-items-center" *ngIf="isSubmissionInProgress">
+                <mat-spinner [diameter]="22"></mat-spinner>
+                Connexion en cours...
+            </div>
+            <button type="submit" mat-raised-button class="w-100 mb-2 sign">Connexion</button>
+        </form>
+        <button mat-raised-button class="w-100 mt-2 sign" [routerLink]="['/auth/sign-up']">Inscription</button>
+    </div>
+</div>

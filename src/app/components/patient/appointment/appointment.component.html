@@ -1,0 +1,46 @@
+<app-navbar-patient></app-navbar-patient>
+
+<div class="main text-center">
+    <div class="d-flex justify-content-center h-100 align-items-center mt-4">
+        <div class="card w-50">
+            <h2 class="m-4">Rendez-vous à Medico</h2>
+            <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+                <mat-form-field appearance="outline" class="w-75">
+                    <mat-label>Services</mat-label>
+                    <mat-select formControlName="service">
+                        <mat-option value="Dentiste">Dentiste</mat-option>
+                        <mat-option value="Cardiologie">Cardiologie</mat-option>
+                        <mat-option value="Neurologie">Neurologie</mat-option>
+                        <mat-option value="Orthopedie">Orthopédie</mat-option>
+                        <mat-option value="Pediatrie">Pédiatrie</mat-option>
+                        <mat-option value="Gynecologie">Gynécologie</mat-option>
+                        <mat-option value="Urgence">Urgences</mat-option>
+                        <mat-option value="Radiologie">Radiologie</mat-option>
+                        <mat-option value="Chirurgie">Chirurgie</mat-option>
+                        <mat-option value="Oncologie">Oncologie</mat-option>
+                        <mat-option value="Dermatologie">Dermatologie</mat-option>
+                    </mat-select>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="w-75">
+                    <mat-label>Dis-nous en un peu plus</mat-label>
+                    <textarea matInput formControlName="descriptionSick"></textarea>
+                </mat-form-field>
+
+                <div class="alert alert-danger p2 d-flex align-items-center" *ngIf="errorMessage ">
+                    <mat-icon>info</mat-icon>
+                    {{errorMessage}}
+                </div>
+
+                <!-- In progess -->
+                <div class="d-flex align-items-center" *ngIf="isSubmissionInProgress">
+                    <mat-spinner [diameter]="22"></mat-spinner>
+                    Envoi en Cours...
+                </div>
+                <button class="w-75 mb-3" mat-raised-button>Primary</button>
+            </form>
+        </div>
+    </div>
+
+</div>
+
+<app-footer-patient></app-footer-patient>

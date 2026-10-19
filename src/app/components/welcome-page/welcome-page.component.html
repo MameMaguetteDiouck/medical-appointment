@@ -1,0 +1,142 @@
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid navig ">
+        <a class="navbar-brand border-0 couleur" [routerLink]="['/doctors']">Medico</a>
+        <button class="navbar-toggler bg-white border-white" type="button" data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+            aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse " id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#home">Acceuil</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="#about">À Propos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#doctors">Docteurs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#contacts">Contacts</a>
+                </li>
+            </ul>
+            <button class="ms-2 sign" mat-raised-button [routerLink]="['/auth/sign-in']">Connexion</button>
+            <button class="ms-2 sign me-3" mat-raised-button [routerLink]="['/auth/sign-up']">Inscription</button>
+        </div>
+    </div>
+</nav>
+<section id="home">
+    <h2>Acceuil</h2>
+    <div class="text-white ms-0 d-flex flex-column justify-content-center text-capitalize">
+        <h1>Bienvenue À Medico</h1>
+        <h1>L'assistance médicale à votre chevet</h1>
+    </div>
+</section>
+
+<section id="about">
+    <h2 class="">À Propos de Medico</h2>
+    <div class="container d-flex align-items-center">
+        <div class="">
+            <h2>Description</h2>
+            <p class="color w-100 p-3 m-4">
+                Le Centre Médical Santé+ est un établissement de soins pluridisciplinaire dédié à la santé, à la
+                prévention et au bien-être de chacun. Idéalement situé au cœur de la ville, notre centre propose une
+                offre de soins complète, accessible et moderne, dans un environnement chaleureux et à taille humaine.
+                <br><br><br>
+
+                Notre structure regroupe une équipe de professionnels de santé expérimentés et complémentaires, incluant
+                des médecins généralistes, des spécialistes, des infirmiers, des psychologues et d’autres praticiens
+                paramédicaux. Cette approche collaborative permet d’assurer un suivi médical global et cohérent, centré
+                sur les besoins spécifiques de chaque patient.
+            </p>
+        </div>
+        <div class="p-3 m-4">
+            <h2>Nos Services</h2>
+            <p class="p-3 m-4">
+                Nous proposons un large éventail de services médicaux accessibles à tous, avec ou sans rendez-vous,
+                notamment :
+            </p>
+            <ul class="">
+                <li>Consultations de médecine générale</li>
+                <li>Pédiatrie</li>
+                <li>Gynécologie et suivi de grossesse</li>
+                <li>Dermatologie</li>
+                <li>Cardiologie</li>
+                <li>Ophtalmologie</li>
+                <li>Consultations en psychologie et santé mentale</li>
+                <li>Vaccinations et bilans de santé</li>
+                <li>Suivi des maladies chroniques (diabète, hypertension, etc.)</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section id="doctors">
+    <h2>Nos Medecins</h2>
+    <div class="col-12 col-md-6 col-lg-4 mb-3 d-flex justify-content-center align-items-center w-100" *ngFor="let doctor of allDoctors; let i = index">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Dr. {{ doctor.fullName }} : {{ doctor.service }}</h5>
+                <p class="card-text">
+                    <small class="text-muted">Jours disponibles : {{ doctor.freeDays.join(`,
+                        `) }}</small>
+                </p>
+                <p class="card-text">
+                    <small class="text-muted">Heures : {{ doctor.startTime }} - {{
+                        doctor.endTime }}</small>
+                </p>
+                <p class="card-text">
+                    <small class="text-muted">Description : {{ doctor.description }}</small>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="contacts">
+    <h2>Contactez-nous</h2>
+    <div class="w-50 d-flex justify-content-center align-items-center">
+        <form class="w-75" action="">
+            <input class="w-75" type="text" placeholder="Nom">
+            <input class="w-75" type="text" placeholder="Prénom">
+            <input class="w-75" type="email" placeholder="example@test.essai">
+            <input class="w-75" type="tel" placeholder="+221 77 777 77 77">
+            <textarea class="w-75 big-input" type="text" placeholder="Votre avis?" name="" id=""></textarea>
+            <input class="w-75 button color" type="button" value="Soumettre">
+        </form>
+    </div>
+    <div>
+        
+    </div>
+</section>
+
+<div class="justify-content-end d-flex">
+    <a class="bi bi-arrow-up-square" href="#home"></a>
+</div>
+
+<footer class="couleur w-100 m-0">
+    <div class="d-flex justify-content-center  mt-2 align-items-center w-100 border-bottom">  
+        <div class="d-flex flex-column w-50">
+            <a class="mb-2" href="#home">Acceuil</a>
+            <a class="mb-2" href="#about">À Propos</a>
+            <a class="mb-2" href="#doctors">Doctors</a>
+            <a class="mb-2" href="#contacts">Contacs</a>
+        </div>
+        <div class="w-50 text-white ms-5">
+            <h2>Nos Services</h2>
+            <ul class="w-100 d-flex flex-column align-items-start">
+                <li class="mb-2 w-100 text-white">Pédiatrie</li>
+                <li class="mb-2 w-100 text-white">Consultations de médecine générale</li>
+                <li class="mb-2 w-100 text-white">Gynécologie et suivi de grossesse</li>
+                <li class="mb-2 w-100 text-white">Dermatologie</li>
+                <li class="mb-2 w-100 text-white">Cardiologie</li>
+                <li class="mb-2 w-100 text-white">Ophtalmologie</li>
+                <li class="mb-2 w-100 text-white">Consultations en psychologie et santé mentale</li>
+                <li class="mb-2 w-100 text-white">Vaccinations et bilans de santé</li>
+                <li class="mb-2 w-100 text-white">Suivi des maladies chroniques (diabète, hypertension, etc.)</li>
+            </ul>
+        </div>
+    </div>
+    <p class="mb-2 mt-2">&copy; 2025 Mamedi. Tous droits réservés.</p>
+</footer>

@@ -1,0 +1,45 @@
+<nav class="navbar navbar-expand-lg">
+  <div class="container-fluid navig ">
+    <a class="navbar-brand border-0 couleur" [routerLink]="['/doctors']">Medico</a>
+    <button class="navbar-toggler bg-white border-white" type="button" data-bs-toggle="collapse"
+      data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse " id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active " aria-current="page" [routerLink]="['/doctors']">Accueil</a>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/doctors/prescriptions']">Prescription</a>
+        </li> -->
+        <li class="nav-item">
+          <a class="nav-link" [routerLink]="['/doctors/patients']">Mes Patients</a>
+        </li>
+      </ul>
+      <form class="d-flex mb-sm-2" role="search">
+        <input class="form-control me-2 " type="search" placeholder="Search" aria-label="Search" />
+        <button class="btn" type="submit">Search</button>
+      </form>
+      <div>
+        <button class=" bg-white border-0 rounded-circle ms-2 text-black" matIconButton [matMenuTriggerFor]="menu"><i
+            class="bi bi-person-circle text-black bg-white"></i></button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item>
+            <mat-icon>person</mat-icon>
+            <span *ngIf="currentUser">{{ currentUser.firstName }} {{ currentUser.lastName }}</span>
+          </button>
+          <button mat-menu-item disabled>
+            <mat-icon>voicemail</mat-icon>
+            <span>Check voice mail</span>
+          </button>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>exit_to_app</mat-icon>
+            <span>Déconnexion</span>
+          </button>
+        </mat-menu>
+      </div>
+    </div>
+  </div>
+</nav>
