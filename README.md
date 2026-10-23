@@ -1,59 +1,102 @@
-# MedicalAppointment
+# 🏥 Medico — Plateforme de Gestion de Rendez-Vous Médicaux & Suivi Clinique
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.1.7.
+Plateforme web médicale moderne conçue pour simplifier et sécuriser la prise en charge des patients, la coordination des soins et le travail des praticiens au sein d'un centre pluridisciplinaire.
 
-## Development server
+---
 
-To start a local development server, run:
+## 🚀 Stack Technique & Architecture
 
+- **Frontend :** [Angular 19+](https://angular.dev) — Architecture **100% Standalone**, contrôle de flux moderne (`@if`, `@for`, `@switch`), et gestion d'état réactive par **Signals** (`signal()`, `computed()`).
+- **Styling :** CSS Vanilla modulaire, composants Angular Material, icônes Bootstrap Icons, et charte visuelle ancrée sur l'identité de marque **Gris Ardoise (`#566573`)**.
+- **Backend & Données :** [Firebase](https://firebase.google.com/) (Firebase Auth, Cloud Firestore) avec règles de sécurité strictes déployées côté serveur (`firestore.rules`).
+- **Impression Médicale :** Moteur d'impression sur iframe isolée garantissant une sortie d'ordonnance officielle sur **1 seule page A4** sans fuite d'interface ni duplication.
+
+---
+
+## 🔑 Comptes de Démonstration & Identifiants par Rôle
+
+Trois profils types sont pré-configurés pour tester l'intégralité des flux métiers de la plateforme :
+
+| Rôle | Utilisateur | Email de connexion | Mot de passe | ID / UID Dossier | Fonctionnalités clés |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **👤 Patient** | **Fatou Ndiaye** | `fatou.ndiaye@medico.sn` | `MedicoPatient2026!` | `9W92e8l58d...` | Prise de RDV en ligne, historique de consultations, consultation et impression des ordonnances délivrées. *(Inscription libre disponible sur `/auth/sign-up`)* |
+| **🩺 Médecin** | **Dr. Cheikh Tidiane Sow** *(Médecine Générale)* | `ct.sow@medico.sn` | `DocteurSow2026!` | `xJm6dF39...` | Dashboard praticien, gestion des consultations du jour, saisie d'observations et prescription d'ordonnances avec impression mono-page. |
+| **📋 Secrétariat** | **Awa Fall** *(Accueil & Régulation)* | `secretariat@medico.sn` | `Secretaire2026!` | `3VqTdHNuvGa56lXengWqnlbGUXF3` | Validation des demandes de rendez-vous, affectation des créneaux horaires, et gestion des praticiens avec génération de mots de passe temporaires sécurisés. |
+
+---
+
+## 🧭 Espaces & Parcours Métiers
+
+### 1. Espace Patient (`/patients`)
+- **Tableau de Bord Réactif :** Vue synthétique sur le prochain rendez-vous, le nombre de demandes en attente et les consultations passées.
+- **Prise de Rendez-vous (`/patients/appointment`) :** Sélection par pôle de soins (Cardiologie, Pédiatrie, Dentiste, Médecine Générale, etc.), choix optionnel du praticien préféré, sélecteur de date avec validation anti-date passée, et récapitulatif interactif.
+- **Ordonnances Médicales :** Accès direct à l'ordonnance officielle avec en-tête Medico, posologie, durée de validité et bouton d'impression directe.
+
+### 2. Espace Médecin (`/doctors`)
+- **Pilotage Quotidien :** KPI en temps réel des rendez-vous d'aujourd'hui, des patients à examiner et des consultations honorées.
+- **Consultation & Prescription :** Modale de consultation pour saisir le diagnostic clinique et composer la liste thérapeutique (médicaments, posologies).
+- **Répertoire Patients & Registre d'Ordonnances :** Historique complet des consultations par patient et traçabilité des traitements délivrés.
+
+### 3. Espace Secrétariat (`/secretaries`)
+- **Régulation des Rendez-vous (`/secretaries/validate-appointment`) :** Validation ou réassignation des demandes de consultation, attribution des horaires précis et du médecin traitant.
+- **Gestion des Praticiens (`/secretaries/management-doctor`) :** Ajout de médecins avec génération de mots de passe temporaires cryptographiquement sécurisés et forçage de changement de mot de passe à la première connexion (`mustChangePassword`).
+
+---
+
+## 🔒 Sécurité & Règles Firestore
+
+L'accès aux collections Cloud Firestore est verrouillé par les règles [`firestore.rules`](./firestore.rules) déployées en production :
+
+1. **Cloisonnement Patient :** Chaque patient ne peut lire et modifier que ses propres données (`request.auth.uid == patientId`) et ses propres rendez-vous. Il ne peut ni s'auto-attribuer un statut confirmé ni altérer une ordonnance.
+2. **Accès Praticien & Secret Médical :** Seul le personnel soignant habilité (`isDoctor()` ou `isSecretary()`) peut renseigner des observations et prescrire des ordonnances.
+3. **Immutabilité des Actes Clôturés :** Une fois la consultation passée (`status == 'Passé'`), les actes médicaux ne peuvent plus être supprimés.
+4. **Provisionnement Sécurisé :** Les comptes médecins sont provisionnés avec des mots de passe temporaires uniques générés via l'API Web Cryptography (`generateSecureTemporaryPassword()`).
+
+---
+
+## 💻 Installation & Démarrage Local
+
+### Prérequis
+- [Node.js](https://nodejs.org/) (v18+ ou v20+ recommandé)
+- [npm](https://www.npmjs.com/)
+
+### Étapes
+
+1. **Cloner le projet et installer les dépendances :**
 ```bash
-ng serve
+git clone <url-du-depot>
+cd medical-appointment
+npm install
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
-
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
+2. **Lancer le serveur de développement Angular :**
 ```bash
-ng generate component component-name
+npm start
+```
+L'application est accessible sur [http://localhost:4200](http://localhost:4200).
+
+3. **Déployer les règles de sécurité Firestore (administrateur) :**
+```bash
+firebase deploy --only firestore:rules
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+---
 
-```bash
-ng generate --help
-```
+## 🎨 Charte Graphique & Tokens de Couleur
 
-## Building
+L'identité de Medico repose sur le **Gris Ardoise Clinique** :
 
-To build the project run:
+| Token | Code Hexa | Rôle dans l'application |
+| :--- | :--- | :--- |
+| `--medico-primary` | `#566573` | En-tête, pied de page, boutons d'action principaux, badges actifs |
+| `--medico-primary-dark` | `#475461` | États au survol (hover) et menu mobile |
+| `--medico-primary-subtle`| `#f1f5f9` | Fonds d'icônes, badges secondaires et cartes légères |
+| `--status-success` | `#047857` sur `#ecfdf5` | Consultations clôturées / honorées |
+| `--status-warning` | `#b45309` sur `#fffbeb` | Demandes en attente de confirmation |
+| `--status-info` | `#1d4ed8` sur `#eff6ff` | Rendez-vous confirmés programmés |
 
-```bash
-ng build
-```
+---
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+## 📄 Licence & Droits
 
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Projet développé pour le **Centre Médical Medico Dakar** — Tous droits réservés &copy; 2025-2026.
