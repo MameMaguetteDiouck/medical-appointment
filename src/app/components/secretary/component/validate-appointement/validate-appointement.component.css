@@ -1,0 +1,349 @@
+.validation-page-main {
+  background-color: #f8fafc;
+  min-height: calc(100vh - 120px);
+}
+
+/* Page Header */
+.page-badge {
+  background-color: #e2e8f0;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.page-title {
+  font-size: 1.65rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+}
+
+.page-subtitle {
+  font-size: 0.88rem;
+  color: #64748b;
+}
+
+.stat-pill {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.stat-pill-label {
+  color: #64748b;
+}
+
+.stat-pill-val {
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.alert-pill {
+  border-color: #fecaca;
+  background-color: #fff5f5;
+}
+
+.alert-pill .stat-pill-val {
+  color: #dc2626;
+}
+
+/* Segmented Navigation Tabs */
+.status-tabs-nav {
+  display: flex;
+}
+
+.tab-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #475569;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.tab-btn:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+}
+
+.tab-btn.active {
+  background-color: #566573;
+  border-color: #566573;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(86, 101, 115, 0.2);
+}
+
+.tab-btn.active .badge.bg-secondary {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff;
+}
+
+.tab-icon {
+  font-size: 1.15rem;
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-right: 6px;
+}
+
+/* Appointment Cards */
+.appointment-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.25rem 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.appointment-card:hover {
+  box-shadow: 0 4px 12px rgba(86, 101, 115, 0.06);
+}
+
+.patient-avatar-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: #f1f5f9;
+  color: #566573;
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+}
+
+.patient-name {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.patient-contact {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.specialty-badge {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.status-badge {
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.status-warning {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.status-success {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+
+.status-completed {
+  background-color: #f1f5f9;
+  color: #475569;
+}
+
+.status-danger {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.meta-icon {
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+  color: #64748b;
+}
+
+.meta-val {
+  font-size: 0.88rem;
+}
+
+.symptoms-box {
+  background-color: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  color: #334155;
+  line-height: 1.45;
+}
+
+/* Action Buttons */
+.btn-action-confirm {
+  background-color: #566573;
+  color: #ffffff;
+  border: 1px solid #566573;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.btn-action-confirm:hover {
+  background-color: #465360;
+  border-color: #465360;
+  color: #ffffff;
+}
+
+.btn-action-edit {
+  background-color: #ffffff;
+  color: #566573;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.btn-action-edit:hover {
+  background-color: #f8fafc;
+  border-color: #566573;
+  color: #1e293b;
+}
+
+.btn-action-cancel {
+  background-color: #ffffff;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.btn-action-cancel:hover {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+.btn-icon {
+  font-size: 1.1rem;
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+/* Empty State */
+.empty-state-card {
+  background: #ffffff;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+}
+
+.empty-icon {
+  font-size: 3rem;
+  width: 3rem;
+  height: 3rem;
+}
+
+.empty-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.empty-text {
+  font-size: 0.88rem;
+}
+
+/* Modals */
+.clean-modal {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+}
+
+.modal-header {
+  background-color: #f8fafc;
+  padding: 1.25rem 1.5rem;
+}
+
+.modal-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.modal-subtitle {
+  font-size: 0.82rem;
+}
+
+.patient-recap-banner {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.doctor-select-box {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.btn-primary-action {
+  background-color: #566573;
+  color: #ffffff;
+  border: 1px solid #566573;
+  border-radius: 8px;
+  padding: 8px 18px;
+  font-weight: 500;
+  font-size: 0.88rem;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.15s ease;
+}
+
+.btn-primary-action:hover {
+  background-color: #465360;
+  border-color: #465360;
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 1.4rem;
+  }
+  .status-tabs-nav {
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .appointment-card {
+    padding: 1rem;
+  }
+}

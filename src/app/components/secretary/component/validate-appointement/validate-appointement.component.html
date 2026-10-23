@@ -1,305 +1,460 @@
 <app-navbar-secretary></app-navbar-secretary>
-<div class="main w-100">
-    <div class="container text-center color w-100">
-        <div class="mt-3 d-flex flex-column justify-content-center align-items-center w-100">
-            @if (allAppointments.length == 0)
-            {
-            <p>Aucun rendez-vous demandé</p>
+
+<main class="main validation-page-main">
+  <div class="container py-4">
+    <!-- Header -->
+    <div class="page-header d-flex flex-wrap justify-content-between align-items-center mb-4">
+      <div class="header-text text-start">
+        <span class="page-badge mb-1 d-inline-block">Secrétariat médical</span>
+        <h1 class="page-title mb-1">Validation des rendez-vous</h1>
+        <p class="page-subtitle text-muted mb-0">
+          Suivi, planification et assignation des praticiens par consultation
+        </p>
+      </div>
+      <div class="header-stats d-flex gap-2">
+        <div class="stat-pill">
+          <span class="stat-pill-label">Total :</span>
+          <span class="stat-pill-val">{{ allAppointments.length }}</span>
+        </div>
+        <div class="stat-pill alert-pill">
+          <span class="stat-pill-label">À traiter :</span>
+          <span class="stat-pill-val">{{ allAppointmentStandby.length }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Segmented Navigation Tabs -->
+    <div class="status-tabs-nav d-flex flex-wrap gap-2 mb-4">
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'standby'" (click)="setActiveTab('standby')">
+        <mat-icon class="tab-icon">hourglass_top</mat-icon>
+        <span>En attente</span>
+        <span class="badge ms-2" [class.bg-danger]="allAppointmentStandby.length > 0" [class.bg-secondary]="allAppointmentStandby.length === 0">
+          {{ allAppointmentStandby.length }}
+        </span>
+      </button>
+
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'confirmed'" (click)="setActiveTab('confirmed')">
+        <mat-icon class="tab-icon">event_available</mat-icon>
+        <span>Confirmés</span>
+        <span class="badge ms-2 bg-secondary">{{ allAppointmentConfirmed.length }}</span>
+      </button>
+
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'completed'" (click)="setActiveTab('completed')">
+        <mat-icon class="tab-icon">task_alt</mat-icon>
+        <span>Passés</span>
+        <span class="badge ms-2 bg-secondary">{{ allAppointmentCompleted.length }}</span>
+      </button>
+
+      <button type="button" class="tab-btn" [class.active]="activeTab() === 'cancelled'" (click)="setActiveTab('cancelled')">
+        <mat-icon class="tab-icon">event_busy</mat-icon>
+        <span>Annulés</span>
+        <span class="badge ms-2 bg-secondary">{{ allAppointmentCancelled.length }}</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: En attente -->
+    @if (activeTab() === 'standby') {
+      <div class="tab-pane-content text-start">
+        @if (allAppointmentStandby.length === 0) {
+          <div class="empty-state-card text-center py-5">
+            <mat-icon class="empty-icon text-muted mb-2">check_circle_outline</mat-icon>
+            <h3 class="empty-title mb-1">Aucun rendez-vous en attente</h3>
+            <p class="empty-text text-muted mb-0">Toutes les demandes de consultation ont été traitées.</p>
+          </div>
+        } @else {
+          <div class="appointments-list">
+            @for (appointment of allAppointmentStandby; track appointment.id) {
+              <div class="appointment-card mb-3">
+                <div class="card-body-top d-flex flex-wrap justify-content-between align-items-start gap-2">
+                  <div class="patient-identity d-flex align-items-center">
+                    <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
+                      <div class="patient-avatar-circle me-3">
+                        {{ getPatientInitials(patient) }}
+                      </div>
+                      <div>
+                        <h3 class="patient-name mb-0">{{ patient.firstName }} {{ patient.lastName }}</h3>
+                        <span class="patient-contact text-muted small">{{ patient.email || 'Email non renseigné' }}</span>
+                      </div>
+                    </ng-container>
+                  </div>
+
+                  <div class="appointment-meta-badges d-flex align-items-center gap-2">
+                    <span class="specialty-badge">{{ appointment.service }}</span>
+                    <span class="status-badge status-warning">En attente de validation</span>
+                  </div>
+                </div>
+
+                <div class="card-body-mid my-3 pt-3 border-top">
+                  <div class="row g-3">
+                    <div class="col-12 col-md-5">
+                      <div class="meta-row d-flex align-items-center text-muted mb-1">
+                        <mat-icon class="meta-icon me-2">calendar_today</mat-icon>
+                        <span class="meta-val">Date demandée : <strong>{{ appointment.day | date:'dd/MM/yyyy' }}</strong></span>
+                      </div>
+                      <div class="meta-row d-flex align-items-center text-muted">
+                        <mat-icon class="meta-icon me-2">schedule</mat-icon>
+                        <span class="meta-val">Heure souhaitée : <strong>{{ appointment.hourStart || 'À convenir' }}</strong></span>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-7">
+                      <div class="meta-row text-muted mb-1">
+                        <span class="small fw-semibold text-uppercase text-secondary">Motif / Symptômes :</span>
+                      </div>
+                      <p class="symptoms-box mb-0">
+                        {{ appointment.descriptionSick || 'Aucune description fournie par le patient.' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="card-body-bottom d-flex justify-content-end align-items-center gap-2 pt-2 border-top">
+                  <button type="button" class="btn btn-action-cancel" (click)="openCancelModal(appointment)">
+                    <mat-icon class="me-1 btn-icon">close</mat-icon>
+                    <span>Annuler</span>
+                  </button>
+                  <button type="button" class="btn btn-action-confirm" (click)="openConfirmModal(appointment)">
+                    <mat-icon class="me-1 btn-icon">event_available</mat-icon>
+                    <span>Planifier & Confirmer</span>
+                  </button>
+                </div>
+              </div>
             }
-            @else
-            {
-            <div class="w-100">
-                <h2 class="m-3">Les rendez-vous en attente de confirmation</h2>
-                <mat-accordion class="w-100">
-                    <mat-expansion-panel class="mb-2" *ngFor="let appointment of allAppointmentStandby"
-                        (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                    {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                                </ng-container>
-                            </mat-panel-title>
-                            <mat-panel-description>
-                                Détails {{panelOpenState() ? 'Ouverts' : 'fermés'}}
-                            </mat-panel-description>
-                        </mat-expansion-panel-header>
-                        <p>{{appointment.descriptionSick}}</p>
-                        <button type="button" class="btn btn-success me-2" data-bs-toggle="modal"
-                            [attr.data-bs-target]="'#confirmedAppointment-' + appointment.id"
-                            (click)="initConfirmForm(appointment)">
-                            Confirmer le rendez-vous
-                        </button>
-                        <button type="button" class="btn btn-danger me-2" data-bs-toggle="modal"
-                            [attr.data-bs-target]="'#cancelledAppointment-' + appointment.id">
-                            Annuler le rendez-vous
-                        </button>
+          </div>
+        }
+      </div>
+    }
 
-                        <!-- Modal Confirmed-->
-                        <div class="modal fade" [id]="'confirmedAppointment-' + appointment.id" tabindex="-1"
-                            role="dialog" aria-bs-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content couleur text-white">
-                                    <div class="modal-header text-white">
-                                        <h2 class="modal-title" id="exampleModalLongTitle">Annulation de RV</h2>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <div>
-                                            Voulez-vous confirmer ce rendez-vous de
-                                            <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                                {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                                            </ng-container> ??!!
-                                        </div>
+    <!-- TAB 2: Confirmés -->
+    @if (activeTab() === 'confirmed') {
+      <div class="tab-pane-content text-start">
+        @if (allAppointmentConfirmed.length === 0) {
+          <div class="empty-state-card text-center py-5">
+            <mat-icon class="empty-icon text-muted mb-2">event_busy</mat-icon>
+            <h3 class="empty-title mb-1">Aucun rendez-vous confirmé</h3>
+            <p class="empty-text text-muted mb-0">Les consultations confirmées apparaîtront ici.</p>
+          </div>
+        } @else {
+          <div class="appointments-list">
+            @for (appointment of allAppointmentConfirmed; track appointment.id) {
+              <div class="appointment-card mb-3">
+                <div class="card-body-top d-flex flex-wrap justify-content-between align-items-start gap-2">
+                  <div class="patient-identity d-flex align-items-center">
+                    <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
+                      <div class="patient-avatar-circle me-3">
+                        {{ getPatientInitials(patient) }}
+                      </div>
+                      <div>
+                        <h3 class="patient-name mb-0">{{ patient.firstName }} {{ patient.lastName }}</h3>
+                        <span class="patient-contact text-muted small">{{ patient.email || 'Email non renseigné' }}</span>
+                      </div>
+                    </ng-container>
+                  </div>
 
-                                        <form *ngIf="appointmentForm" [formGroup]="appointmentForm">
-                                            <div class="mb-3">
-                                                <label class="form-label">Date</label>
-                                                <input type="date" class="form-control" formControlName="day">
-                                            </div>
-                                            <div *ngIf="errorMessage!=''">
-                                                <h5>{{errorMessage}}</h5>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="form-label">Heure</label>
-                                                <input type="time" class="form-control" formControlName="hourStart">
-                                            </div>
-                                            <button type="button" class="btn btn-primary"
-                                                (click)="searchAvailableDoctors()">
-                                                Rechercher Docteurs Disponibles
-                                            </button>
-                                            <div *ngIf="availableDoctors.length > 0">
-                                                <label>Docteur disponible</label>
-                                                <select class="form-control" formControlName="doctorId">
-                                                    <option value="">-- Choisir un docteur --</option>
-                                                    <option *ngFor="let doctor of availableDoctors" [value]="doctor.id">
-                                                        {{ doctor.fullName }}
-                                                    </option>
-                                                </select>
-                                            </div>
-                                            <div *ngIf="availableDoctors.length == 0 && 
-                                                    appointmentForm.get('day')?.value && 
-                                                    appointmentForm.get('hourStart')?.value">
-                                                <h5>Aucun docteur disponible</h5>
-                                            </div>
-                                        </form>
+                  <div class="appointment-meta-badges d-flex align-items-center gap-2">
+                    <span class="specialty-badge">{{ appointment.service }}</span>
+                    <span class="status-badge status-success">Confirmé</span>
+                  </div>
+                </div>
 
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Fermer</button>
-                                        <div *ngIf="availableDoctors.length != 0">
-                                            <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
-                                                (click)="updateAppointment(appointment.id)">
-                                                Confirmer
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Modal Canceled-->
-                        <div class="modal fade" [id]="'cancelledAppointment-' + appointment.id" tabindex="-1"
-                            role="dialog" aria-bs-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content couleur text-white">
-                                    <div class="modal-header text-white">
-                                        <h5 class="modal-title" id="exampleModalLongTitle">Annulation de RV</h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Voulez-vous annuler ce rendez-vous de
-                                        <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                            {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                                        </ng-container>??!!
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Fermer</button>
-                                        <button type="button" data-bs-dismiss="modal"
-                                            (click)="updateAppointmentStatus(appointment.id, cancelledStatus)"
-                                            class="btn btn-primary">Confirmer</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </mat-expansion-panel>
-                </mat-accordion>
-            </div>
-            <div class="w-100">
-                <h2 class="m-3">Les rendez-vous confimé</h2>
-                <mat-accordion class="w-100">
-                    <mat-expansion-panel class="mb-2" *ngFor="let appointment of allAppointmentConfirmed"
-                        (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                    {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                                </ng-container>
-                            </mat-panel-title>
-                            <mat-panel-description>
-                                Détails {{panelOpenState() ? 'Ouverts' : 'fermés'}}
-                            </mat-panel-description>
-                        </mat-expansion-panel-header>
-                        <p>Date: {{appointment.day}}</p>
-                        <p>Heure du rv: {{appointment.hourStart}}</p>
-                        <p>Nom du docteur: Dr. {{appointment.doctorName}}</p>
-                        <p>{{appointment.descriptionSick}}</p>
-                        <button type="button" class="btn btn-success me-2" data-bs-toggle="modal"
-                            [attr.data-bs-target]="'#updateConfirmedAppointment-' + appointment.id"
-                            (click)="initConfirmForm(appointment)">
-                            Modifier le rv
-                        </button>
-                        <button type="button" class="btn btn-danger me-2" data-bs-toggle="modal"
-                            [attr.data-bs-target]="'#cancelledAppointment-' + appointment.id">
-                            Annuler le rendez-vous
-                        </button>
+                <div class="card-body-mid my-3 pt-3 border-top">
+                  <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                      <div class="meta-row d-flex align-items-center text-muted mb-1">
+                        <mat-icon class="meta-icon me-2">calendar_today</mat-icon>
+                        <span class="meta-val">Date : <strong>{{ appointment.day | date:'dd/MM/yyyy' }}</strong></span>
+                      </div>
+                      <div class="meta-row d-flex align-items-center text-muted">
+                        <mat-icon class="meta-icon me-2">schedule</mat-icon>
+                        <span class="meta-val">Horaire : <strong>{{ appointment.hourStart }}</strong></span>
+                      </div>
+                    </div>
 
-                        <div class="modal fade" [id]="'updateConfirmedAppointment-' + appointment.id" tabindex="-1"
-                            role="dialog" aria-bs-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content couleur text-white">
-                                    <div class="modal-header text-white">
-                                        <h2 class="modal-title">Mise à jour du rendez-vous confirmé</h2>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
+                    <div class="col-12 col-md-4">
+                      <div class="meta-row d-flex align-items-center text-muted mb-1">
+                        <mat-icon class="meta-icon me-2">medical_services</mat-icon>
+                        <span class="meta-val">Praticien : <strong>{{ appointment.doctorName || 'Dr. Assigné' }}</strong></span>
+                      </div>
+                    </div>
 
-                                    <div class="modal-body">
-                                        <div>
-                                            Modifier le rendez-vous de
-                                            <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                                {{ patient.firstName }} {{ patient.lastName }} : {{ appointment.service
-                                                }}
-                                            </ng-container>
-                                        </div>
+                    <div class="col-12 col-md-4">
+                      <div class="meta-row text-muted mb-1">
+                        <span class="small fw-semibold text-uppercase text-secondary">Motif :</span>
+                      </div>
+                      <p class="symptoms-box mb-0">
+                        {{ appointment.descriptionSick || 'Non renseigné' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-                                        <form *ngIf="appointmentForm" [formGroup]="appointmentForm">
-                                            <div class="mb-3">
-                                                <label class="form-label">Date</label>
-                                                <input type="date" class="form-control" formControlName="day">
-                                            </div>
-
-                                            <div *ngIf="errorMessage !== ''">
-                                                <h5 class="text-warning">{{ errorMessage }}</h5>
-                                            </div>
-
-                                            <div class="mb-3">
-                                                <label class="form-label">Heure</label>
-                                                <input type="time" class="form-control" formControlName="hourStart">
-                                            </div>
-
-                                            <button type="button" class="btn btn-primary"
-                                                (click)="searchAvailableDoctors()">
-                                                Rechercher Docteurs Disponibles
-                                            </button>
-
-                                            <div *ngIf="availableDoctors.length > 0" class="mt-3">
-                                                <label class="form-label">Docteur disponible</label>
-                                                <select class="form-control" formControlName="doctorId">
-                                                    <option value="">-- Choisir un docteur --</option>
-                                                    <option *ngFor="let doctor of availableDoctors" [value]="doctor.id">
-                                                        {{ doctor.fullName }}
-                                                    </option>
-                                                </select>
-                                            </div>
-
-                                            <div *ngIf="availableDoctors.length === 0 && appointmentForm.get('day')?.value && appointmentForm.get('hourStart')?.value"
-                                                class="mt-3">
-                                                <h5 class="text-warning">Aucun docteur disponible</h5>
-                                            </div>
-                                        </form>
-                                    </div>
-
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Fermer</button>
-
-                                        <div *ngIf="availableDoctors.length > 0">
-                                            <button type="button" class="btn btn-success" data-bs-dismiss="modal"
-                                                (click)="updateAppointment(appointment.id)">
-                                                Mettre à jour
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Modal Canceled-->
-                        <div class="modal fade" [id]="'cancelledAppointment-' + appointment.id" tabindex="-1"
-                            role="dialog" aria-bs-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered" role="document">
-                                <div class="modal-content couleur text-white">
-                                    <div class="modal-header text-white">
-                                        <h5 class="modal-title" id="exampleModalLongTitle">Annulation de RV</h5>
-                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        Voulez-vous annuler ce rendez-vous de
-                                        <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                            {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                                        </ng-container>??!!
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-bs-dismiss="modal">Fermer</button>
-                                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal"
-                                            (click)="updateAppointmentStatus(appointment.id, cancelledStatus)">
-                                            Confirmer
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </mat-expansion-panel>
-                </mat-accordion>
-            </div>
-            <div class="w-100">
-                <h2 class="m-3">Les rendez-vous complété</h2>
-                <mat-accordion class="w-100">
-                    <mat-expansion-panel class="mb-2" *ngFor="let appointment of allAppointmentCompleted"
-                        (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                    {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                                </ng-container>
-                            </mat-panel-title>
-                            <mat-panel-description>
-                                Détails {{panelOpenState() ? 'Ouverts' : 'fermés'}}
-                            </mat-panel-description>
-                        </mat-expansion-panel-header>
-                        <p>{{appointment.descriptionSick}}</p>
-                        <p>{{appointment.doctorObservation}}</p>
-                    </mat-expansion-panel>
-                </mat-accordion>
-            </div>
-            <div class="w-100">
-                <h2 class="m-3">Les rendez-vous annulé</h2>
-                <mat-accordion class="w-100">
-                    <mat-expansion-panel class="mb-2" *ngFor="let appointment of allAppointmentCancelled"
-                        (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
-                        <mat-expansion-panel-header>
-                            <mat-panel-title>
-                                <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                    {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                                </ng-container>
-                            </mat-panel-title>
-                            <mat-panel-description>
-                                Détails {{panelOpenState() ? 'Ouverts' : 'fermés'}}
-                            </mat-panel-description>
-                        </mat-expansion-panel-header>
-                        <p>{{appointment.descriptionSick}}</p>
-
-                    </mat-expansion-panel>
-                </mat-accordion>
-            </div>
+                <div class="card-body-bottom d-flex justify-content-end align-items-center gap-2 pt-2 border-top">
+                  <button type="button" class="btn btn-action-cancel" (click)="openCancelModal(appointment)">
+                    <mat-icon class="me-1 btn-icon">close</mat-icon>
+                    <span>Annuler</span>
+                  </button>
+                  <button type="button" class="btn btn-action-edit" (click)="openConfirmModal(appointment)">
+                    <mat-icon class="me-1 btn-icon">edit_calendar</mat-icon>
+                    <span>Modifier le créneau</span>
+                  </button>
+                </div>
+              </div>
             }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- TAB 3: Passés / Complétés -->
+    @if (activeTab() === 'completed') {
+      <div class="tab-pane-content text-start">
+        @if (allAppointmentCompleted.length === 0) {
+          <div class="empty-state-card text-center py-5">
+            <mat-icon class="empty-icon text-muted mb-2">history</mat-icon>
+            <h3 class="empty-title mb-1">Aucune consultation passée</h3>
+            <p class="empty-text text-muted mb-0">L'historique des consultations effectuées s'affichera ici.</p>
+          </div>
+        } @else {
+          <div class="appointments-list">
+            @for (appointment of allAppointmentCompleted; track appointment.id) {
+              <div class="appointment-card mb-3">
+                <div class="card-body-top d-flex flex-wrap justify-content-between align-items-start gap-2">
+                  <div class="patient-identity d-flex align-items-center">
+                    <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
+                      <div class="patient-avatar-circle me-3">
+                        {{ getPatientInitials(patient) }}
+                      </div>
+                      <div>
+                        <h3 class="patient-name mb-0">{{ patient.firstName }} {{ patient.lastName }}</h3>
+                        <span class="patient-contact text-muted small">{{ patient.email || 'Email non renseigné' }}</span>
+                      </div>
+                    </ng-container>
+                  </div>
+
+                  <div class="appointment-meta-badges d-flex align-items-center gap-2">
+                    <span class="specialty-badge">{{ appointment.service }}</span>
+                    <span class="status-badge status-completed">Passé</span>
+                  </div>
+                </div>
+
+                <div class="card-body-mid my-3 pt-3 border-top">
+                  <div class="row g-3">
+                    <div class="col-12 col-md-4">
+                      <div class="meta-row d-flex align-items-center text-muted mb-1">
+                        <mat-icon class="meta-icon me-2">calendar_today</mat-icon>
+                        <span class="meta-val">Date : <strong>{{ appointment.day | date:'dd/MM/yyyy' }}</strong></span>
+                      </div>
+                      <div class="meta-row d-flex align-items-center text-muted">
+                        <mat-icon class="meta-icon me-2">schedule</mat-icon>
+                        <span class="meta-val">Horaire : <strong>{{ appointment.hourStart || 'Consultation terminée' }}</strong></span>
+                      </div>
+                    </div>
+
+                    <div class="col-12 col-md-8">
+                      <div class="meta-row text-muted mb-1">
+                        <span class="small fw-semibold text-uppercase text-secondary">Observations médicales :</span>
+                      </div>
+                      <p class="symptoms-box mb-0">
+                        {{ appointment.doctorObservation || 'Aucune observation enregistrée pour cette consultation.' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- TAB 4: Annulés -->
+    @if (activeTab() === 'cancelled') {
+      <div class="tab-pane-content text-start">
+        @if (allAppointmentCancelled.length === 0) {
+          <div class="empty-state-card text-center py-5">
+            <mat-icon class="empty-icon text-muted mb-2">event_busy</mat-icon>
+            <h3 class="empty-title mb-1">Aucun rendez-vous annulé</h3>
+            <p class="empty-text text-muted mb-0">Les rendez-vous annulés apparaîtront ici.</p>
+          </div>
+        } @else {
+          <div class="appointments-list">
+            @for (appointment of allAppointmentCancelled; track appointment.id) {
+              <div class="appointment-card mb-3 opacity-75">
+                <div class="card-body-top d-flex flex-wrap justify-content-between align-items-start gap-2">
+                  <div class="patient-identity d-flex align-items-center">
+                    <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
+                      <div class="patient-avatar-circle me-3">
+                        {{ getPatientInitials(patient) }}
+                      </div>
+                      <div>
+                        <h3 class="patient-name mb-0">{{ patient.firstName }} {{ patient.lastName }}</h3>
+                        <span class="patient-contact text-muted small">{{ patient.email || 'Email non renseigné' }}</span>
+                      </div>
+                    </ng-container>
+                  </div>
+
+                  <div class="appointment-meta-badges d-flex align-items-center gap-2">
+                    <span class="specialty-badge">{{ appointment.service }}</span>
+                    <span class="status-badge status-danger">Annulé</span>
+                  </div>
+                </div>
+
+                <div class="card-body-mid my-3 pt-3 border-top">
+                  <div class="row g-3">
+                    <div class="col-12 col-md-5">
+                      <div class="meta-row d-flex align-items-center text-muted mb-1">
+                        <mat-icon class="meta-icon me-2">calendar_today</mat-icon>
+                        <span class="meta-val">Date demandée : <strong>{{ appointment.day | date:'dd/MM/yyyy' }}</strong></span>
+                      </div>
+                    </div>
+                    <div class="col-12 col-md-7">
+                      <p class="symptoms-box mb-0 text-muted">
+                        {{ appointment.descriptionSick || 'Aucune description disponible.' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</main>
+
+<!-- Unified Modal: Confirm & Schedule -->
+@if (showConfirmModal()) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal d-block fade show" tabindex="-1" role="dialog" aria-modal="true" (click)="closeConfirmModal($event)">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+      <div class="modal-content clean-modal shadow text-start">
+        <div class="modal-header border-bottom">
+          <div>
+            <h2 class="modal-title mb-0">Planifier & Confirmer la consultation</h2>
+            <p class="modal-subtitle text-muted mb-0 small">Affectation d'un praticien disponible pour ce créneau</p>
+          </div>
+          <button type="button" class="btn-close" (click)="closeConfirmModal()"></button>
         </div>
 
+        <div class="modal-body py-4">
+          @if (selectedAppointment(); as app) {
+            <!-- Patient summary banner -->
+            <div class="patient-recap-banner p-3 mb-4 rounded-3 d-flex justify-content-between align-items-center">
+              <div>
+                <span class="text-muted small d-block">Patient concerné</span>
+                <strong class="fs-6">
+                  @if (selectedPatient(); as pt) {
+                    {{ pt.firstName }} {{ pt.lastName }}
+                  } @else {
+                    Patient
+                  }
+                </strong>
+              </div>
+              <div class="text-end">
+                <span class="text-muted small d-block">Spécialité</span>
+                <span class="badge specialty-badge">{{ app.service }}</span>
+              </div>
+            </div>
+
+            <!-- Form -->
+            <form *ngIf="appointmentForm" [formGroup]="appointmentForm">
+              <div class="row g-3 mb-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold">Date de consultation</label>
+                  <input type="date" class="form-control" formControlName="day">
+                </div>
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold">Heure de consultation</label>
+                  <input type="time" class="form-control" formControlName="hourStart">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <button type="button" class="btn btn-outline-secondary d-inline-flex align-items-center" (click)="searchAvailableDoctors()" [disabled]="isSearchingDoctors()">
+                  <mat-icon class="me-2 small">search</mat-icon>
+                  <span>{{ isSearchingDoctors() ? 'Recherche en cours...' : 'Rechercher les praticiens disponibles' }}</span>
+                </button>
+              </div>
+
+              @if (errorMessage) {
+                <div class="alert alert-warning py-2 px-3 small d-flex align-items-center mb-3">
+                  <mat-icon class="me-2 small">warning</mat-icon>
+                  <span>{{ errorMessage }}</span>
+                </div>
+              }
+
+              @if (availableDoctors.length > 0) {
+                <div class="doctor-select-box p-3 rounded-3 mb-3">
+                  <label class="form-label fw-semibold mb-2">Choisir le praticien disponible</label>
+                  <select class="form-select" formControlName="doctorId">
+                    <option value="">-- Sélectionner un praticien --</option>
+                    @for (doctor of availableDoctors; track doctor.id) {
+                      <option [value]="doctor.id">{{ doctor.fullName }} ({{ doctor.service }})</option>
+                    }
+                  </select>
+                </div>
+              }
+            </form>
+          }
+        </div>
+
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-light border" (click)="closeConfirmModal()">Fermer</button>
+          @if (availableDoctors.length > 0 && selectedAppointment(); as app) {
+            <button type="button" class="btn btn-primary-action" (click)="updateAppointment(app.id)" [disabled]="appointmentForm.invalid">
+              <mat-icon class="me-1 small">check</mat-icon>
+              <span>Valider la confirmation</span>
+            </button>
+          }
+        </div>
+      </div>
     </div>
-</div>
+  </div>
+}
+
+<!-- Unified Modal: Cancel Appointment -->
+@if (showCancelModal()) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal d-block fade show" tabindex="-1" role="dialog" aria-modal="true" (click)="closeCancelModal($event)">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content clean-modal shadow text-start">
+        <div class="modal-header border-bottom">
+          <h2 class="modal-title mb-0">Annulation de rendez-vous</h2>
+          <button type="button" class="btn-close" (click)="closeCancelModal()"></button>
+        </div>
+
+        <div class="modal-body py-4">
+          @if (selectedAppointment(); as app) {
+            <p class="mb-3">
+              Confirmez-vous l'annulation de la demande de rendez-vous pour :
+            </p>
+            <div class="p-3 bg-light rounded-3 mb-3">
+              <strong>
+                @if (selectedPatient(); as pt) {
+                  {{ pt.firstName }} {{ pt.lastName }}
+                } @else {
+                  Patient
+                }
+              </strong>
+              <div class="text-muted small">Service : {{ app.service }}</div>
+              <div class="text-muted small">Date : {{ app.day | date:'dd/MM/yyyy' }}</div>
+            </div>
+            <p class="small text-danger mb-0">
+              Cette action marquera la consultation comme annulée dans le dossier patient.
+            </p>
+          }
+        </div>
+
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-light border" (click)="closeCancelModal()">Retour</button>
+          <button type="button" class="btn btn-danger" (click)="confirmCancelAppointment()">
+            Confirmer l'annulation
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
 <app-footer-secretary></app-footer-secretary>
