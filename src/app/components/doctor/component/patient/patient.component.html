@@ -1,78 +1,337 @@
 <app-navbar-doctor></app-navbar-doctor>
 
-<div class="main">
-    <div class="container text-center d-flex flex-column mt-5">
-        <h2 class="color">Mes Rendez-vous d'aujourd'hui</h2>
-
-        <div class="w-100">
-            <h2 class="m-3">Les rendez-vous confimé</h2>
-            <mat-accordion class="w-100">
-                <mat-expansion-panel class="mb-2" *ngFor="let appointment of allAppointmentCompleted"
-                    (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                            </ng-container>
-                        </mat-panel-title>
-                        <mat-panel-description>
-                            Détails {{panelOpenState() ? 'Ouverts' : 'fermés'}}
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <p>Date: {{appointment.day}}</p>
-                    <p>Heure du rv: {{appointment.hourStart}}</p>
-                    <p>{{appointment.descriptionSick}}</p>
-                    <div class="mb-3 w-100 d-flex flex-column alert alert-danger" *ngIf="errorMessage">
-                        {{errorMessage}}
-                    </div>
-                    <button type="button" class="btn btn-success me-2" data-bs-toggle="modal"
-                        [attr.data-bs-target]="'#confirmedAppointment-' + appointment.id" (click)="initConfirmForm(appointment)">
-                        Donnez un rendez-vous
-                    </button>
-
-                    <!-- Modal Confirmed-->
-                    <div class="modal fade" [id]="'confirmedAppointment-' + appointment.id" tabindex="-1" role="dialog">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content couleur text-white">
-                                <div class="modal-header text-white">
-                                    <h2 class="modal-title" id="exampleModalLongTitle">Confirmation du rv</h2>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div>
-                                        Voulez-vous donner ce rendez-vous à
-                                        <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                            {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                                        </ng-container> ??!!
-                                    </div>
-
-                                    <form *ngIf="appointmentForm" [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
-                                        <input type="hidden" formControlName="patientId" [value]="appointment.patientId">
-                                        <div class="mb-3">
-                                            <label class="form-label">Date</label>
-                                            <input type="date" class="form-control" formControlName="day">
-                                        </div>
-                                        <div *ngIf="errorMessage!=''">
-                                            <h5>{{errorMessage}}</h5>
-                                        </div>
-                                        <div class="mb-3">
-                                            <label class="form-label">Heure</label>
-                                            <input type="time" class="form-control" formControlName="hourStart">
-                                        </div>
-                                        <div class="mb-3">
-                                            <!-- <label class="form-label">Heure</label> -->
-                                            <input type="submit" class="form-control" value="Ajouter" data-bs-dismiss="modal">
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </mat-expansion-panel>
-            </mat-accordion>
+<main class="doctor-patients-main py-4">
+  <div class="container">
+    <!-- Header Banner -->
+    <div class="patients-header-card p-4 rounded-4 mb-4 shadow-sm border bg-white">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <div class="header-icon-box bg-primary-subtle text-primary">
+              <mat-icon>folder_shared</mat-icon>
+            </div>
+            <h1 class="page-title mb-0">Mes Patients & Dossiers Médicaux</h1>
+          </div>
+          <p class="text-muted small mb-0">
+            Répertoire des patients suivis par Dr. {{ currentUser()?.fullName || 'Praticien' }} • Historique des examens & programmation de suivis
+          </p>
         </div>
+
+        <!-- Search Bar -->
+        <div class="search-box-wrapper">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">
+              <mat-icon class="small text-muted">search</mat-icon>
+            </span>
+            <input
+              type="text"
+              class="form-control form-control-sm border-start-0 ps-0"
+              placeholder="Rechercher nom, téléphone, motif..."
+              [value]="searchQuery()"
+              (input)="searchQuery.set($any($event.target).value)"
+            >
+            @if (searchQuery()) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary border-start-0"
+                (click)="searchQuery.set('')"
+                title="Effacer"
+              >
+                <mat-icon class="small">close</mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
     </div>
-</div>
+
+    <!-- Toast Alert -->
+    @if (feedbackMessage()) {
+      <div
+        class="alert alert-{{ feedbackMessage()!.type }} d-flex align-items-center justify-content-between p-3 rounded-3 shadow-sm mb-4 fade show"
+        role="alert"
+      >
+        <div class="d-flex align-items-center gap-2">
+          <mat-icon>{{ feedbackMessage()!.type === 'success' ? 'check_circle' : 'error' }}</mat-icon>
+          <span>{{ feedbackMessage()!.text }}</span>
+        </div>
+        <button type="button" class="btn-close" (click)="feedbackMessage.set(null)" aria-label="Fermer"></button>
+      </div>
+    }
+
+    <!-- Content Area -->
+    @if (isLoading()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <p class="text-muted small">Chargement des dossiers patients...</p>
+      </div>
+    } @else if (filteredPatients.length === 0) {
+      <div class="empty-state-card text-center py-5 bg-white border rounded-4 shadow-sm p-4">
+        <div class="empty-icon-box mx-auto mb-3">
+          <mat-icon>people_outline</mat-icon>
+        </div>
+        <h3 class="fs-5 fw-bold text-dark mb-1">Aucun dossier patient trouvé</h3>
+        <p class="text-muted small mb-0">
+          @if (searchQuery()) {
+            Aucun patient ne correspond à votre recherche "{{ searchQuery() }}".
+          } @else {
+            Vous n'avez pas encore de consultations enregistrées avec des patients.
+          }
+        </p>
+      </div>
+    } @else {
+      <!-- Patients Grid -->
+      <div class="row g-3">
+        @for (item of filteredPatients; track item.patient.id) {
+          <div class="col-12 col-lg-6 col-xl-4">
+            <div class="patient-card p-3 rounded-3 border bg-white shadow-sm h-100 d-flex flex-column justify-content-between">
+              <div>
+                <!-- Top Header: Avatar + Identity -->
+                <div class="d-flex align-items-start justify-content-between mb-3">
+                  <div class="d-flex align-items-center gap-3">
+                    <div class="patient-avatar-circle">
+                      {{ getPatientInitials(item.patient) }}
+                    </div>
+                    <div>
+                      <h3 class="patient-name mb-0">
+                        {{ item.patient.firstName }} {{ item.patient.lastName }}
+                      </h3>
+                      <span class="badge bg-light text-secondary border smaller">
+                        Dossier #{{ item.patient.id.substring(0, 8) }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <span class="badge count-tag">
+                    {{ item.totalConsultations }} consultation{{ item.totalConsultations > 1 ? 's' : '' }}
+                  </span>
+                </div>
+
+                <!-- Contact & Info -->
+                <div class="info-block p-2 rounded-2 bg-light mb-3">
+                  <div class="d-flex align-items-center gap-2 text-muted smaller mb-1">
+                    <mat-icon class="tiny-icon">phone</mat-icon>
+                    <span class="text-dark">{{ item.patient.phone || 'Non renseigné' }}</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2 text-muted smaller mb-1">
+                    <mat-icon class="tiny-icon">email</mat-icon>
+                    <span class="text-truncate">{{ item.patient.email || 'Non renseigné' }}</span>
+                  </div>
+                  <div class="d-flex align-items-center gap-2 text-muted smaller">
+                    <mat-icon class="tiny-icon">location_on</mat-icon>
+                    <span class="text-truncate">{{ item.patient.address || 'Dakar' }}</span>
+                  </div>
+                </div>
+
+                <!-- Last Consultation Snippet -->
+                @if (item.lastAppointment) {
+                  <div class="last-consultation-snippet mb-3 p-2 rounded-2 border">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                      <span class="text-muted smaller fw-bold text-uppercase">Dernière visite</span>
+                      <span class="smaller fw-medium text-dark">{{ item.lastAppointment.day }}</span>
+                    </div>
+                    <p class="mb-0 text-muted smaller text-truncate">
+                      {{ item.lastAppointment.descriptionSick || 'Motif non renseigné' }}
+                    </p>
+                  </div>
+                }
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="d-flex gap-2 pt-3 border-top mt-2">
+                <button
+                  type="button"
+                  class="btn btn-outline-primary btn-sm flex-grow-1 d-flex align-items-center justify-content-center gap-1"
+                  (click)="openHistoryModal(item)"
+                >
+                  <mat-icon class="small">history_edu</mat-icon>
+                  <span>Dossier & Historique</span>
+                </button>
+
+                <button
+                  type="button"
+                  class="btn btn-primary-action btn-sm d-flex align-items-center justify-content-center gap-1 px-3"
+                  (click)="openScheduleModal(item)"
+                  title="Convoquer pour un suivi"
+                >
+                  <mat-icon class="small">event_available</mat-icon>
+                  <span class="d-none d-sm-inline">Re-convoquer</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</main>
+
+<!-- Modal: Historique du Patient (Timeline) -->
+@if (showHistoryModal() && selectedPatientSummary()) {
+  <div class="modal-backdrop fade show"></div>
+  <div
+    class="modal d-block fade show"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    (click)="closeHistoryModal($event)"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content shadow border-0 text-start">
+        <div class="modal-header d-flex justify-content-between align-items-center border-bottom px-4 py-3">
+          <div class="d-flex align-items-center gap-2">
+            <mat-icon class="text-primary">folder_shared</mat-icon>
+            <div>
+              <h2 class="modal-title mb-0 fs-5 fw-bold text-dark">
+                Dossier Patient : {{ selectedPatientSummary()!.patient.firstName }} {{ selectedPatientSummary()!.patient.lastName }}
+              </h2>
+              <p class="text-muted smaller mb-0">
+                Historique des {{ selectedPatientSummary()!.appointments.length }} consultations réalisées
+              </p>
+            </div>
+          </div>
+          <button type="button" class="btn-close" (click)="closeHistoryModal()" aria-label="Fermer"></button>
+        </div>
+
+        <div class="modal-body p-4" style="max-height: 70vh; overflow-y: auto;">
+          <!-- Patient Summary Card -->
+          <div class="p-3 rounded-3 bg-light border mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+              <div class="fw-bold text-dark">{{ selectedPatientSummary()!.patient.firstName }} {{ selectedPatientSummary()!.patient.lastName }}</div>
+              <div class="text-muted smaller">Tél : {{ selectedPatientSummary()!.patient.phone || 'Non renseigné' }} • Email : {{ selectedPatientSummary()!.patient.email }}</div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-primary-action d-flex align-items-center gap-1"
+              (click)="closeHistoryModal(); openScheduleModal(selectedPatientSummary()!)"
+            >
+              <mat-icon class="small">add</mat-icon>
+              <span>Programmer un suivi</span>
+            </button>
+          </div>
+
+          <!-- Timeline of Appointments -->
+          <div class="d-flex flex-column gap-3">
+            @for (appt of selectedPatientSummary()!.appointments; track appt.id) {
+              <div class="timeline-consultation-card p-3 rounded-3 border bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                      {{ appt.day }} à {{ appt.hourStart }}
+                    </span>
+                    <span class="text-muted smaller">Pôle {{ appt.service }}</span>
+                  </div>
+                  <span class="badge" [class.bg-success-subtle]="appt.status === 'Passé'" [class.text-success]="appt.status === 'Passé'" [class.bg-warning-subtle]="appt.status === 'Confirmé'" [class.text-dark]="appt.status === 'Confirmé'">
+                    {{ appt.status }}
+                  </span>
+                </div>
+
+                <div class="mb-2">
+                  <span class="text-muted smaller fw-semibold d-block">Motif initial :</span>
+                  <p class="mb-0 text-dark small">{{ appt.descriptionSick }}</p>
+                </div>
+
+                @if (appt.doctorObservation) {
+                  <div class="p-2 rounded-2 bg-light border mb-2">
+                    <span class="text-success smaller fw-bold d-block">Observation & Diagnostic :</span>
+                    <p class="mb-0 text-dark small" style="white-space: pre-line;">{{ appt.doctorObservation }}</p>
+                  </div>
+                }
+
+                @if ((appt.ordonnance || appt.orrdonnance || []).length > 0) {
+                  <div>
+                    <span class="text-primary smaller fw-bold d-block mb-1">Traitement prescrit :</span>
+                    <ul class="list-group list-group-flush mb-0 small">
+                      @for (med of (appt.ordonnance || appt.orrdonnance || []); track med) {
+                        <li class="list-group-item px-0 py-1 d-flex align-items-center gap-2">
+                          <mat-icon class="small text-success">check</mat-icon>
+                          <span>{{ med }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="modal-footer border-top px-4 py-3">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="closeHistoryModal()">Fermer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal: Programmer un Rendez-vous de Suivi -->
+@if (showScheduleModal() && selectedPatientSummary()) {
+  <div class="modal-backdrop fade show"></div>
+  <div
+    class="modal d-block fade show"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    (click)="closeScheduleModal($event)"
+  >
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content shadow border-0 text-start">
+        <div class="modal-header d-flex justify-content-between align-items-center border-bottom px-4 py-3">
+          <div class="d-flex align-items-center gap-2">
+            <mat-icon class="text-primary">event_available</mat-icon>
+            <div>
+              <h2 class="modal-title mb-0 fs-5 fw-bold text-dark">
+                Programmer un Rendez-vous de Suivi
+              </h2>
+              <p class="text-muted smaller mb-0">
+                Patient : {{ selectedPatientSummary()!.patient.firstName }} {{ selectedPatientSummary()!.patient.lastName }}
+              </p>
+            </div>
+          </div>
+          <button type="button" class="btn-close" (click)="closeScheduleModal()" [disabled]="isSubmittingSchedule()"></button>
+        </div>
+
+        <div class="modal-body p-4">
+          <form [formGroup]="scheduleForm" (ngSubmit)="submitSchedule()">
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-dark small mb-1">Date du rendez-vous *</label>
+              <input type="date" class="form-control" formControlName="day">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-dark small mb-1">Heure de début *</label>
+              <input type="time" class="form-control" formControlName="hourStart">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold text-dark small mb-1">Motif de la re-convocation / suivi *</label>
+              <textarea class="form-control" rows="3" formControlName="descriptionSick" placeholder="Ex: Contrôle tensionnel après traitement, Bilan sanguin..."></textarea>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer border-top d-flex justify-content-between align-items-center px-4 py-3">
+          <button type="button" class="btn btn-light border btn-sm" (click)="closeScheduleModal()" [disabled]="isSubmittingSchedule()">
+            Annuler
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary-action btn-sm"
+            [disabled]="scheduleForm.invalid || isSubmittingSchedule()"
+            (click)="submitSchedule()"
+          >
+            @if (isSubmittingSchedule()) {
+              <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+              <span>Enregistrement...</span>
+            } @else {
+              <mat-icon class="small me-1">check</mat-icon>
+              <span>Confirmer le rendez-vous</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 <app-footer-doctor></app-footer-doctor>

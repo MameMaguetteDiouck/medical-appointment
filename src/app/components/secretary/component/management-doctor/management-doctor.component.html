@@ -1,413 +1,765 @@
 <app-navbar-secretary></app-navbar-secretary>
-<div class="main text-center flex-fill">
-    <div class="w-100 container">
-        <ul class="nav pt-4 nav-tabs border-0 d-flex justify-content-center align-items-center" id="medicoTabs"
-            role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link border-0 active custom-tab-text" id="liste-tab" data-bs-toggle="tab"
-                    data-bs-target="#liste-medecins" type="button" role="tab" aria-controls="liste-medecins"
-                    aria-selected="true">
-                    <h4>Liste des médecins</h4>
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link border-0 custom-tab-text" id="ajout-tab" data-bs-toggle="tab"
-                    data-bs-target="#ajout-medecin" type="button" role="tab" aria-controls="ajout-medecin"
-                    aria-selected="false">
-                    <h4>Ajout des medEcin</h4>
-                </button>
-            </li>
-        </ul>
 
-        <div class="tab-content w-100 content" id="medicoTabsContent">
-            <div class="tab-pane fade w-100" id="ajout-medecin" role="tabpanel" aria-labelledby="ajout-tab"
-                tabindex="0">
-                <div class="d-flex justify-content-center w-100 align-items-center mt-4">
-                    <div class="card w-100 mx-3">
-                        <div class="card-body">
-                            <h2 class="mb-4">Rendez-vous à Medico</h2>
-                            <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()">
-                                <div class="row mb-3">
-                                    <div class="col-12 col-md-6">
-                                        <mat-form-field appearance="outline" class="w-100">
-                                            <mat-label>Nom Complet</mat-label>
-                                            <input matInput formControlName="fullName">
-                                            <mat-error *ngIf="fullName?.hasError('required')">Le nom est
-                                                requis</mat-error>
-                                            <mat-error *ngIf="fullName?.hasError('minlength')">Minimum 3
-                                                caractères</mat-error>
-                                        </mat-form-field>
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <mat-form-field appearance="outline" class="w-100">
-                                            <mat-label>Adresse</mat-label>
-                                            <input matInput formControlName="address">
-                                            <mat-error *ngIf="address?.hasError('required')">L'adresse est
-                                                requise</mat-error>
-                                            <mat-error *ngIf="address?.hasError('minlength')">Minimum 5
-                                                caractères</mat-error>
-                                        </mat-form-field>
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-12 col-md-6">
-                                        <mat-form-field appearance="outline" class="w-100">
-                                            <mat-label>Service</mat-label>
-                                            <mat-select formControlName="service">
-                                                <mat-option *ngFor="let service of services" [value]="service">{{
-                                                    service }}</mat-option>
-                                            </mat-select>
-                                            <mat-error *ngIf="service?.hasError('required')">Le service est
-                                                requis</mat-error>
-                                        </mat-form-field>
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <mat-form-field appearance="outline" class="w-100">
-                                            <mat-label>Jours libres</mat-label>
-                                            <mat-select formControlName="freeDays" multiple>
-                                                <mat-option *ngFor="let day of days" [value]="day">{{ day
-                                                    }}</mat-option>
-                                            </mat-select>
-                                        </mat-form-field>
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-md-6 col-12">
-                                        <label for="updateStartTime" class="form-label">Heure de début</label>
-                                        <input type="time" class="form-control" id="updateStartTime"
-                                            formControlName="startTime">
-                                        <div *ngIf="startTime?.invalid && startTime?.touched" class="text-danger">
-                                            <small *ngIf="startTime?.errors?.['required']">L'heure de début est
-                                                requise</small>
-                                        </div>
-                                    </div>
+<main class="main doctor-management-main">
+  <div class="container py-4">
+    <!-- Header Banner -->
+    <div class="page-header d-flex flex-wrap justify-content-between align-items-center mb-4">
+      <div class="header-text text-start">
+        <span class="page-badge mb-1 d-inline-block">Corps médical</span>
+        <h1 class="page-title mb-1">Gestion des praticiens</h1>
+        <p class="page-subtitle text-muted mb-0">
+          Supervision de l'équipe soignante, plannings horaires par jour et disponibilités en cabinet
+        </p>
+      </div>
 
-                                    <div class="col-md-6 mb-3">
-                                        <label for="updateEndTime" class="form-label">Heure de fin</label>
-                                        <input type="time" class="form-control" id="updateEndTime"
-                                            formControlName="endTime">
-                                        <div *ngIf="endTime?.invalid && endTime?.touched" class="text-danger">
-                                            <small *ngIf="endTime?.errors?.['required']">L'heure de fin est
-                                                requise</small>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="row mb-3">
-                                    <div class="col-12 col-md-6">
-                                        <mat-form-field appearance="outline" class="w-100">
-                                            <mat-label>Email</mat-label>
-                                            <input matInput formControlName="email">
-                                            <mat-error *ngIf="email?.hasError('required')">L'email est
-                                                requis</mat-error>
-                                            <mat-error *ngIf="email?.hasError('email')">Email invalide</mat-error>
-                                        </mat-form-field>
-                                    </div>
-                                    <div class="col-12 col-md-6">
-                                        <mat-form-field appearance="outline" class="w-100">
-                                            <mat-label>Téléphone</mat-label>
-                                            <input matInput formControlName="phone">
-                                            <mat-error *ngIf="phone?.hasError('required')">Le téléphone est
-                                                requis</mat-error>
-                                            <mat-error *ngIf="phone?.hasError('pattern')">Format invalide (ex:
-                                                +1234567890)</mat-error>
-                                        </mat-form-field>
-                                    </div>
-                                </div>
-                                <div class="row mb-3">
-                                    <div class="col-12">
-                                        <mat-form-field appearance="outline" class="w-100">
-                                            <mat-label>Description</mat-label>
-                                            <textarea matInput formControlName="description" rows="3"></textarea>
-                                            <mat-error *ngIf="description?.hasError('minlength')">Minimum 10
-                                                caractères</mat-error>
-                                        </mat-form-field>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-12 d-flex justify-content-center">
-                                        <button class="btn btn-primary w-75" mat-raised-button
-                                            [disabled]="isSubmitting">
-                                            {{ isSubmitting ? 'Ajout en cours...' : 'Ajouter le docteur' }}
-                                        </button>
-                                    </div>
-                                </div>
-                                <div class="row mt-3" *ngIf="successMessage || errorMessage">
-                                    <div class="col-12 text-center">
-                                        <div *ngIf="successMessage" class="alert alert-success">{{ successMessage }}
-                                        </div>
-                                        <div *ngIf="errorMessage" class="alert alert-danger">{{ errorMessage }}</div>
-                                    </div>
-                                </div>
-                            </form>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="tab-pane fade show active w-100 " id="liste-medecins" role="tabpanel"
-                aria-labelledby="liste-tab" tabindex="0">
-                <div class="container-fluid p-4 ">
-                    <div class="row ">
-                        <div class="col-12">
-                            <div class="row d-flex justify-content-center align-items-center">
-                                <div class="col-12 col-md-6 col-lg-4 mb-3"
-                                    *ngFor="let doctor of allDoctors; let i = index">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <h5 class="card-title">Dr. {{ doctor.fullName }}</h5>
-                                            <p class="card-text">{{ doctor.service }}</p>
-                                            <p class="card-text">
-                                                <small class="text-muted">{{ doctor.phone }}</small>
-                                            </p>
-                                            <p class="card-text">
-                                                <small class="text-muted">{{ doctor.email }}</small>
-                                            </p>
-                                            <p class="card-text">
-                                                <small class="text-muted">Adresse : {{ doctor.address }}</small>
-                                            </p>
-                                            <p class="card-text">
-                                                <small class="text-muted">Jours disponibles : {{ doctor.freeDays.join(`,
-                                                    `) }}</small>
-                                            </p>
-                                            <p class="card-text">
-                                                <small class="text-muted">Heures : {{ doctor.startTime }} - {{
-                                                    doctor.endTime }}</small>
-                                            </p>
-                                            <p class="card-text">
-                                                <small class="text-muted">Description : {{ doctor.description }}</small>
-                                            </p>
-                                            <div class="d-flex justify-content-center align-items-center">
-                                                <button class="btn btn-danger me-2" data-bs-toggle="modal"
-                                                    data-bs-target="#deleteModal" (click)="setSelectedDoctor(doctor)">
-                                                    Limoger
-                                                </button>
-                                                <button class="btn btn-primary me-2" data-bs-toggle="modal"
-                                                    data-bs-target="#updateModal" (click)="setSelectedDoctor(doctor)">
-                                                    Update
-                                                </button>
-                                            </div>
-
-                                            <!-- Modal de suppression -->
-                                            <div class="modal fade" id="deleteModal" tabindex="-1"
-                                                aria-labelledby="deleteModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="deleteModalLabel">Confirmer la
-                                                                suppression</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <p>Êtes-vous sûr de vouloir limoger le docteur <strong>{{
-                                                                    selectedDoctor?.fullName }}</strong> ?</p>
-                                                            <p class="text-danger">Cette action est irréversible.</p>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Annuler</button>
-                                                            <button type="button" class="btn btn-danger"
-                                                                (click)="deleteDoctor()" data-bs-dismiss="modal">
-                                                                Confirmer la suppression
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <!-- Modal de mise à jour -->
-                                            <div class="modal fade" id="updateModal" tabindex="-1"
-                                                aria-labelledby="updateModalLabel" aria-hidden="true">
-                                                <div class="modal-dialog modal-lg">
-                                                    <div class="modal-content">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title" id="updateModalLabel">Modifier le
-                                                                docteur</h5>
-                                                            <button type="button" class="btn-close"
-                                                                data-bs-dismiss="modal" aria-label="Close"></button>
-                                                        </div>
-                                                        <div class="modal-body">
-                                                            <form [formGroup]="updateForm" *ngIf="selectedDoctor">
-                                                                <div class="row">
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="updateFullName"
-                                                                            class="form-label">Nom complet</label>
-                                                                        <input type="text" class="form-control"
-                                                                            id="updateFullName"
-                                                                            formControlName="fullName">
-                                                                        <div *ngIf="updateFullName?.invalid && updateFullName?.touched"
-                                                                            class="text-danger">
-                                                                            <small
-                                                                                *ngIf="updateFullName?.errors?.['required']">Le
-                                                                                nom complet est requis</small>
-                                                                            <small
-                                                                                *ngIf="updateFullName?.errors?.['minlength']">Minimum
-                                                                                3 caractères</small>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="updateEmail"
-                                                                            class="form-label">Email</label>
-                                                                        <input type="email" class="form-control"
-                                                                            id="updateEmail" formControlName="email">
-                                                                        <div *ngIf="updateEmail?.invalid && updateEmail?.touched"
-                                                                            class="text-danger">
-                                                                            <small
-                                                                                *ngIf="updateEmail?.errors?.['required']">L'email
-                                                                                est requis</small>
-                                                                            <small
-                                                                                *ngIf="updateEmail?.errors?.['email']">Format
-                                                                                email invalide</small>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="row">
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="updatePhone"
-                                                                            class="form-label">Téléphone</label>
-                                                                        <input type="tel" class="form-control"
-                                                                            id="updatePhone" formControlName="phone">
-                                                                        <div *ngIf="updatePhone?.invalid && updatePhone?.touched"
-                                                                            class="text-danger">
-                                                                            <small
-                                                                                *ngIf="updatePhone?.errors?.['required']">Le
-                                                                                téléphone est requis</small>
-                                                                            <small
-                                                                                *ngIf="updatePhone?.errors?.['pattern']">Format
-                                                                                téléphone invalide</small>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="updateService"
-                                                                            class="form-label">Service</label>
-                                                                        <select class="form-select" id="updateService"
-                                                                            formControlName="service">
-                                                                            <option value="">Sélectionnez un service
-                                                                            </option>
-                                                                            <option *ngFor="let service of services"
-                                                                                [value]="service">{{ service }}</option>
-                                                                        </select>
-                                                                        <div *ngIf="updateService?.invalid && updateService?.touched"
-                                                                            class="text-danger">
-                                                                            <small
-                                                                                *ngIf="updateService?.errors?.['required']">Le
-                                                                                service est requis</small>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="row">
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="updateStartTime"
-                                                                            class="form-label">Heure de début</label>
-                                                                        <input type="time" class="form-control"
-                                                                            id="updateStartTime"
-                                                                            formControlName="startTime">
-                                                                        <div *ngIf="updateStartTime?.invalid && updateStartTime?.touched"
-                                                                            class="text-danger">
-                                                                            <small
-                                                                                *ngIf="updateStartTime?.errors?.['required']">L'heure
-                                                                                de début est requise</small>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="col-md-6 mb-3">
-                                                                        <label for="updateEndTime"
-                                                                            class="form-label">Heure de fin</label>
-                                                                        <input type="time" class="form-control"
-                                                                            id="updateEndTime"
-                                                                            formControlName="endTime">
-                                                                        <div *ngIf="updateEndTime?.invalid && updateEndTime?.touched"
-                                                                            class="text-danger">
-                                                                            <small
-                                                                                *ngIf="updateEndTime?.errors?.['required']">L'heure
-                                                                                de fin est requise</small>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="mb-3">
-                                                                    <label for="updateAddress"
-                                                                        class="form-label">Adresse</label>
-                                                                    <textarea class="form-control" id="updateAddress"
-                                                                        formControlName="address" rows="2"></textarea>
-                                                                    <div *ngIf="updateAddress?.invalid && updateAddress?.touched"
-                                                                        class="text-danger">
-                                                                        <small
-                                                                            *ngIf="updateAddress?.errors?.['required']">L'adresse
-                                                                            est requise</small>
-                                                                        <small
-                                                                            *ngIf="updateAddress?.errors?.['minlength']">Minimum
-                                                                            5 caractères</small>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="mb-3">
-                                                                    <label for="updateDescription"
-                                                                        class="form-label">Description</label>
-                                                                    <textarea class="form-control"
-                                                                        id="updateDescription"
-                                                                        formControlName="description"
-                                                                        rows="3"></textarea>
-                                                                    <div *ngIf="updateDescription?.invalid && updateDescription?.touched"
-                                                                        class="text-danger">
-                                                                        <small
-                                                                            *ngIf="updateDescription?.errors?.['minlength']">Minimum
-                                                                            10 caractères</small>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="mb-3">
-                                                                    <label class="form-label">Jours libres</label>
-                                                                    <div class="row">
-                                                                        <div class="col-md-4" *ngFor="let day of days">
-                                                                            <div class="form-check">
-                                                                                <input type="checkbox"
-                                                                                    class="form-check-input"
-                                                                                    [id]="'update-' + day" [value]="day"
-                                                                                    (change)="onDayChange($event, 'update')">
-                                                                                <label class="form-check-label"
-                                                                                    [for]="'update-' + day">{{ day
-                                                                                    }}</label>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </form>
-                                                        </div>
-                                                        <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary"
-                                                                data-bs-dismiss="modal">Annuler</button>
-                                                            <button type="button" class="btn btn-primary"
-                                                                (click)="updateDoctor()"
-                                                                [disabled]="updateForm.invalid">
-                                                                Sauvegarder
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div *ngIf="allDoctors.length === 0" class="col-12">
-                                <div class="alert alert-info text-center">
-                                    <i class="fas fa-info-circle"></i>
-                                    Aucun docteur disponible pour le moment.
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div class="header-actions mt-3 mt-md-0 d-flex gap-2">
+        <button type="button" class="tab-toggle-btn" [class.active]="activeTab() === 'list'" (click)="setActiveTab('list')">
+          <mat-icon class="me-1 tab-toggle-icon">people</mat-icon>
+          <span>Équipe médicale ({{ countDoctors }})</span>
+        </button>
+        <button type="button" class="tab-toggle-btn btn-cta" [class.active]="activeTab() === 'add'" (click)="setActiveTab('add')">
+          <mat-icon class="me-1 tab-toggle-icon">person_add</mat-icon>
+          <span>Ajouter un praticien</span>
+        </button>
+      </div>
     </div>
-</div>
+
+    <!-- Alert Messages -->
+    @if (successMessage) {
+      <div class="alert alert-success d-flex align-items-center justify-content-between py-2 px-3 mb-4 rounded-3 text-start">
+        <div class="d-flex align-items-center">
+          <mat-icon class="me-2 text-success">check_circle</mat-icon>
+          <span>{{ successMessage }}</span>
+        </div>
+        <button type="button" class="btn-close" (click)="clearMessages()"></button>
+      </div>
+    }
+    @if (errorMessage) {
+      <div class="alert alert-danger d-flex align-items-center justify-content-between py-2 px-3 mb-4 rounded-3 text-start">
+        <div class="d-flex align-items-center">
+          <mat-icon class="me-2 text-danger">error</mat-icon>
+          <span>{{ errorMessage }}</span>
+        </div>
+        <button type="button" class="btn-close" (click)="clearMessages()"></button>
+      </div>
+    }
+
+    <!-- VIEW 1: Doctors List -->
+    @if (activeTab() === 'list') {
+      <div class="list-view-container text-start">
+
+        <!-- Quick KPI Pills Bar -->
+        <div class="row g-2 mb-3">
+          <div class="col-6 col-md-3">
+            <div class="kpi-mini-card p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between">
+              <div>
+                <span class="kpi-label d-block text-muted small">Total praticiens</span>
+                <strong class="kpi-val">{{ allDoctors.length }}</strong>
+              </div>
+              <mat-icon class="kpi-icon text-secondary">people_outline</mat-icon>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-mini-card p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between kpi-highlight">
+              <div>
+                <span class="kpi-label d-block text-muted small">En cabinet ce {{ todayDayName }}</span>
+                <strong class="kpi-val text-primary">{{ workingTodayCount }}</strong>
+              </div>
+              <mat-icon class="kpi-icon text-primary">event_available</mat-icon>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-mini-card p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between">
+              <div>
+                <span class="kpi-label d-block text-muted small">En exercice</span>
+                <strong class="kpi-val text-success">{{ activeDoctorsCount }}</strong>
+              </div>
+              <mat-icon class="kpi-icon text-success">check_circle_outline</mat-icon>
+            </div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div class="kpi-mini-card p-3 rounded-3 shadow-sm d-flex align-items-center justify-content-between">
+              <div>
+                <span class="kpi-label d-block text-muted small">En congé / Absent</span>
+                <strong class="kpi-val text-warning">{{ onLeaveDoctorsCount }}</strong>
+              </div>
+              <mat-icon class="kpi-icon text-warning">beach_access</mat-icon>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search, Filter & Layout Bar -->
+        <div class="filters-card p-3 mb-4 rounded-3 shadow-sm">
+          <div class="row g-3 align-items-center">
+            <div class="col-12 col-md-5 col-lg-5">
+              <div class="search-input-wrapper position-relative">
+                <mat-icon class="search-icon position-absolute">search</mat-icon>
+                <input
+                  type="text"
+                  class="form-control search-input ps-5"
+                  placeholder="Rechercher par nom, spécialité, email..."
+                  [value]="searchTerm()"
+                  (input)="onSearchChange($event)"
+                >
+                @if (searchTerm()) {
+                  <button type="button" class="btn btn-sm btn-clear position-absolute" (click)="searchTerm.set('')">
+                    <mat-icon class="small">close</mat-icon>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-3 col-lg-3">
+              <select class="form-select form-select-sm" [value]="selectedSpecialty()" (change)="onSpecialtyChange($event)">
+                <option value="all">Toutes les spécialités</option>
+                @for (service of services; track service) {
+                  <option [value]="service">{{ service }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="col-12 col-sm-6 col-md-2 col-lg-2">
+              <select class="form-select form-select-sm" [value]="selectedStatus()" (change)="onStatusFilterChange($event)">
+                <option value="all">Tous les statuts</option>
+                <option value="active">En exercice</option>
+                <option value="on_leave">En congé</option>
+                <option value="inactive">Inactif</option>
+              </select>
+            </div>
+
+            <!-- Grid / Table view toggle -->
+            <div class="col-12 col-md-2 col-lg-2 d-flex justify-content-end">
+              <div class="btn-group view-toggle-group">
+                <button
+                  type="button"
+                  class="btn btn-sm btn-toggle-view"
+                  [class.active]="displayMode() === 'grid'"
+                  (click)="setDisplayMode('grid')"
+                  title="Affichage en cartes"
+                >
+                  <mat-icon class="small">grid_view</mat-icon>
+                </button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-toggle-view"
+                  [class.active]="displayMode() === 'table'"
+                  (click)="setDisplayMode('table')"
+                  title="Affichage en tableau"
+                >
+                  <mat-icon class="small">table_rows</mat-icon>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State -->
+        @if (filteredDoctors.length === 0) {
+          <div class="empty-state-card text-center py-5">
+            <mat-icon class="empty-icon text-muted mb-2">medical_information</mat-icon>
+            <h3 class="empty-title mb-1">Aucun praticien trouvé</h3>
+            <p class="empty-text text-muted mb-0">Modifiez vos critères de recherche ou réinitialisez les filtres.</p>
+          </div>
+        } @else {
+
+          <!-- VIEW MODE A: Cards Grid -->
+          @if (displayMode() === 'grid') {
+            <div class="row g-3">
+              @for (doctor of filteredDoctors; track doctor.id) {
+                <div class="col-12 col-md-6 col-xl-4">
+                  <div class="doctor-card h-100 d-flex flex-column" [class.doctor-card-on-leave]="doctor.status === 'on_leave'">
+                    <!-- Card Top Header -->
+                    <div class="doctor-card-top d-flex justify-content-between align-items-start mb-3">
+                      <div class="d-flex align-items-center">
+                        <div class="doctor-avatar-circle me-3">
+                          {{ getDoctorInitials(doctor.fullName) }}
+                        </div>
+                        <div>
+                          <h3 class="doctor-name mb-0">Dr. {{ doctor.fullName }}</h3>
+                          <span class="badge specialty-badge mt-1">{{ doctor.service }}</span>
+                        </div>
+                      </div>
+
+                      <div class="status-indicator-badge" [class.badge-active]="(doctor.status || 'active') === 'active'" [class.badge-on-leave]="doctor.status === 'on_leave'" [class.badge-inactive]="doctor.status === 'inactive'">
+                        @if (doctor.status === 'on_leave') {
+                          <span>En congé</span>
+                        } @else if (doctor.status === 'inactive') {
+                          <span>Inactif</span>
+                        } @else {
+                          <span>En exercice</span>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Today Availability Pill -->
+                    @if (isWorkingToday(doctor)) {
+                      <div class="today-badge-banner mb-3 d-flex align-items-center py-1 px-2 rounded-2">
+                        <mat-icon class="today-icon me-1 text-primary">fiber_manual_record</mat-icon>
+                        <span class="small fw-semibold text-primary">
+                          En cabinet aujourd'hui : {{ getTodayHours(doctor) }}
+                        </span>
+                      </div>
+                    }
+
+                    <div class="doctor-card-mid flex-grow-1">
+                      <div class="info-row d-flex align-items-center text-muted mb-1 small">
+                        <mat-icon class="info-icon me-2">phone</mat-icon>
+                        <span>{{ doctor.phone || 'Non renseigné' }}</span>
+                      </div>
+                      <div class="info-row d-flex align-items-center text-muted mb-1 small">
+                        <mat-icon class="info-icon me-2">email</mat-icon>
+                        <span class="text-truncate">{{ doctor.email || 'Non renseigné' }}</span>
+                      </div>
+                      <div class="info-row d-flex align-items-center text-muted mb-3 small">
+                        <mat-icon class="info-icon me-2">location_on</mat-icon>
+                        <span class="text-truncate">{{ doctor.address || 'Cabinet Medico Dakar' }}</span>
+                      </div>
+
+                      <!-- Planning hebdomadaire personnalisé -->
+                      <div class="schedule-block p-2 rounded-2 mb-3">
+                        <div class="d-flex align-items-center justify-content-between text-muted small mb-2">
+                          <div class="d-flex align-items-center">
+                            <mat-icon class="schedule-icon me-1">calendar_month</mat-icon>
+                            <span class="fw-semibold text-dark">Planning hebdomadaire</span>
+                          </div>
+                          <span class="text-muted smaller">({{ doctor.freeDays.length || 0 }} jours)</span>
+                        </div>
+
+                        <div class="schedule-chips-grid d-flex flex-wrap gap-1">
+                          @for (day of doctor.freeDays; track day) {
+                            <div class="day-schedule-chip" [class.highlight-today]="day === todayDayName">
+                              <span class="day-name fw-bold">{{ day.substring(0, 3) }}</span>
+                              <span class="day-hours">{{ formatDayHours(doctor, day) }}</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+
+                      @if (doctor.description) {
+                        <p class="doctor-description text-muted small mb-0">
+                          {{ doctor.description }}
+                        </p>
+                      }
+                    </div>
+
+                    <!-- Card Actions -->
+                    <div class="doctor-card-bottom d-flex justify-content-between align-items-center pt-3 mt-3 border-top">
+                      <!-- Quick status toggle -->
+                      @if (doctor.status === 'on_leave') {
+                        <button type="button" class="btn btn-sm btn-quick-status text-success" (click)="quickToggleStatus(doctor, 'active')" title="Rétablir en exercice">
+                          <mat-icon class="small me-1">play_arrow</mat-icon>
+                          <span>Reprendre service</span>
+                        </button>
+                      } @else if (doctor.status === 'inactive') {
+                        <button type="button" class="btn btn-sm btn-quick-status text-success" (click)="quickToggleStatus(doctor, 'active')" title="Réactiver la fiche">
+                          <mat-icon class="small me-1">check_circle</mat-icon>
+                          <span>Réactiver</span>
+                        </button>
+                      } @else {
+                        <button type="button" class="btn btn-sm btn-quick-status text-muted" (click)="quickToggleStatus(doctor, 'on_leave')" title="Déclarer en congé">
+                          <mat-icon class="small me-1">beach_access</mat-icon>
+                          <span>Mettre en congé</span>
+                        </button>
+                      }
+
+                      <div class="d-flex gap-2">
+                        @if (doctor.status !== 'inactive') {
+                          <button type="button" class="btn btn-action-delete" (click)="openDeleteModal(doctor)" title="Désactiver et archiver">
+                            <mat-icon class="me-1 btn-icon">block</mat-icon>
+                            <span>Désactiver</span>
+                          </button>
+                        } @else {
+                          <button type="button" class="btn btn-action-activate" (click)="quickToggleStatus(doctor, 'active')" title="Réactiver">
+                            <mat-icon class="me-1 btn-icon">check_circle</mat-icon>
+                            <span>Réactiver</span>
+                          </button>
+                        }
+                        <button type="button" class="btn btn-action-edit" (click)="openEditModal(doctor)">
+                          <mat-icon class="me-1 btn-icon">edit</mat-icon>
+                          <span>Modifier</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- VIEW MODE B: Clinical Table -->
+          @if (displayMode() === 'table') {
+            <div class="table-responsive bg-white rounded-3 shadow-sm border">
+              <table class="table table-hover align-middle mb-0 text-start">
+                <thead class="table-light">
+                  <tr>
+                    <th scope="col" class="py-3 ps-3">Praticien</th>
+                    <th scope="col" class="py-3">Pôle / Spécialité</th>
+                    <th scope="col" class="py-3">Contact</th>
+                    <th scope="col" class="py-3">Planning hebdomadaire</th>
+                    <th scope="col" class="py-3">Statut</th>
+                    <th scope="col" class="py-3 text-end pe-3">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (doctor of filteredDoctors; track doctor.id) {
+                    <tr>
+                      <td class="ps-3 py-3">
+                        <div class="d-flex align-items-center">
+                          <div class="doctor-avatar-circle table-avatar me-2">
+                            {{ getDoctorInitials(doctor.fullName) }}
+                          </div>
+                          <div>
+                            <strong class="d-block text-dark">Dr. {{ doctor.fullName }}</strong>
+                            <small class="text-muted">{{ doctor.address }}</small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="badge specialty-badge">{{ doctor.service }}</span>
+                      </td>
+                      <td>
+                        <div class="small text-muted">
+                          <div>{{ doctor.phone }}</div>
+                          <div class="text-truncate">{{ doctor.email }}</div>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="d-flex flex-wrap gap-1 max-w-schedule">
+                          @for (day of doctor.freeDays; track day) {
+                            <span class="day-schedule-chip smaller" [class.highlight-today]="day === todayDayName">
+                              <strong>{{ day.substring(0, 3) }}</strong>: {{ formatDayHours(doctor, day) }}
+                            </span>
+                          }
+                        </div>
+                      </td>
+                      <td>
+                        <span class="status-indicator-badge" [class.badge-active]="(doctor.status || 'active') === 'active'" [class.badge-on-leave]="doctor.status === 'on_leave'" [class.badge-inactive]="doctor.status === 'inactive'">
+                          @if (doctor.status === 'on_leave') {
+                            En congé
+                          } @else if (doctor.status === 'inactive') {
+                            Inactif
+                          } @else {
+                            En exercice
+                          }
+                        </span>
+                      </td>
+                      <td class="text-end pe-3">
+                        <div class="d-inline-flex gap-1">
+                          <button type="button" class="btn btn-sm btn-action-edit" (click)="openEditModal(doctor)" title="Modifier">
+                            <mat-icon class="small">edit</mat-icon>
+                          </button>
+                          @if (doctor.status !== 'inactive') {
+                            <button type="button" class="btn btn-sm btn-action-delete" (click)="openDeleteModal(doctor)" title="Désactiver">
+                              <mat-icon class="small">block</mat-icon>
+                            </button>
+                          } @else {
+                            <button type="button" class="btn btn-sm btn-action-activate" (click)="quickToggleStatus(doctor, 'active')" title="Réactiver">
+                              <mat-icon class="small">check_circle</mat-icon>
+                            </button>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+
+        }
+      </div>
+    }
+
+    <!-- VIEW 2: Add Doctor Form -->
+    @if (activeTab() === 'add') {
+      <div class="add-view-container text-start">
+        <div class="form-container-card p-4 rounded-3 shadow-sm mx-auto">
+          <div class="form-header pb-3 mb-4 border-bottom d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="form-title mb-1">Enregistrer un praticien</h2>
+              <p class="form-subtitle text-muted mb-0 small">
+                Création de la fiche praticien, attribution de sa spécialité et configuration des plannings par jour
+              </p>
+            </div>
+            <button type="button" class="btn btn-sm btn-light border" (click)="setActiveTab('list')">
+              <mat-icon class="me-1 small">arrow_back</mat-icon>
+              <span>Retour à l'équipe</span>
+            </button>
+          </div>
+
+          <form [formGroup]="doctorForm" (ngSubmit)="onSubmit()">
+            <!-- Section 1: Identité & Spécialité -->
+            <div class="form-section mb-4">
+              <h3 class="section-heading mb-3">1. Identité et Affectation</h3>
+              <div class="row g-3">
+                <div class="col-12 col-md-5">
+                  <label class="form-label fw-semibold">Nom complet du praticien *</label>
+                  <input type="text" class="form-control" formControlName="fullName" placeholder="Ex: Dr. Awa Fall">
+                  @if (fullName?.invalid && fullName?.touched) {
+                    <div class="text-danger small mt-1">Le nom est obligatoire (min. 3 caractères).</div>
+                  }
+                </div>
+
+                <div class="col-12 col-md-4">
+                  <label class="form-label fw-semibold">Pôle / Spécialité médicale *</label>
+                  <select class="form-select" formControlName="service">
+                    <option value="">-- Sélectionner une spécialité --</option>
+                    @for (service of services; track service) {
+                      <option [value]="service">{{ service }}</option>
+                    }
+                  </select>
+                  @if (service?.invalid && service?.touched) {
+                    <div class="text-danger small mt-1">La spécialité est requise.</div>
+                  }
+                </div>
+
+                <div class="col-12 col-md-3">
+                  <label class="form-label fw-semibold">Statut initial *</label>
+                  <select class="form-select" formControlName="status">
+                    <option value="active">En exercice</option>
+                    <option value="on_leave">En congé</option>
+                    <option value="inactive">Inactif</option>
+                  </select>
+                </div>
+
+                <div class="col-12">
+                  <label class="form-label fw-semibold">Adresse / Cabinet *</label>
+                  <input type="text" class="form-control" formControlName="address" placeholder="Ex: Dakar, Mermoz - Bâtiment B">
+                  @if (address?.invalid && address?.touched) {
+                    <div class="text-danger small mt-1">L'adresse est obligatoire (min. 5 caractères).</div>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: Contact -->
+            <div class="form-section mb-4">
+              <h3 class="section-heading mb-3">2. Coordonnées professionnelles</h3>
+              <div class="row g-3">
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold">Adresse email professionnelle *</label>
+                  <input type="email" class="form-control" formControlName="email" placeholder="dr.nom@medico.sn">
+                  @if (email?.invalid && email?.touched) {
+                    <div class="text-danger small mt-1">Une adresse email valide est requise.</div>
+                  }
+                </div>
+
+                <div class="col-12 col-md-6">
+                  <label class="form-label fw-semibold">Numéro de téléphone *</label>
+                  <input type="tel" class="form-control" formControlName="phone" placeholder="+221 77 123 45 67">
+                  @if (phone?.invalid && phone?.touched) {
+                    <div class="text-danger small mt-1">Numéro de téléphone requis.</div>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Callout: Compte & Accès Espace Praticien -->
+            <div class="credentials-callout p-3 rounded-3 mb-4 bg-light border d-flex align-items-start gap-3">
+              <div class="p-2 rounded-circle bg-white text-primary border shadow-sm d-flex align-items-center justify-content-center" style="width: 38px; height: 38px;">
+                <mat-icon style="font-size: 20px; width: 20px; height: 20px;">vpn_key</mat-icon>
+              </div>
+              <div class="flex-grow-1">
+                <div class="fw-semibold text-dark small mb-1">Identifiants et accès Espace Praticien</div>
+                <p class="text-muted small mb-0">
+                  Un compte de connexion sera automatiquement provisionné pour cette adresse email avec le mot de passe temporaire
+                  <span class="badge bg-white text-dark border px-2 py-1 font-monospace">Medico2026!</span>.
+                  Le médecin sera automatiquement invité à définir son propre mot de passe dès sa première connexion.
+                </p>
+              </div>
+            </div>
+
+            <!-- Section 3: Plages horaires par jour -->
+            <div class="form-section mb-4">
+              <h3 class="section-heading mb-3">3. Plannings horaires par jour de consultation</h3>
+              
+              <div class="p-3 rounded-3 bg-light border mb-3">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                  <span class="small fw-semibold text-dark">Horaires de référence par défaut :</span>
+                  @if (doctorForm.get('freeDays')?.value?.length > 0) {
+                    <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" (click)="applyHoursToAllDays('add')">
+                      <mat-icon class="small me-1">sync</mat-icon>
+                      <span>Appliquer ces horaires à tous les jours sélectionnés</span>
+                    </button>
+                  }
+                </div>
+                <div class="row g-2">
+                  <div class="col-6">
+                    <label class="form-label small mb-1">Début par défaut *</label>
+                    <input type="time" class="form-control form-control-sm" formControlName="startTime">
+                  </div>
+                  <div class="col-6">
+                    <label class="form-label small mb-1">Fin par défaut *</label>
+                    <input type="time" class="form-control form-control-sm" formControlName="endTime">
+                  </div>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label fw-semibold d-block mb-2">Jours d'exercice hebdomadaires :</label>
+                <div class="d-flex flex-wrap gap-3">
+                  @for (day of days; track day) {
+                    <div class="form-check">
+                      <input
+                        type="checkbox"
+                        class="form-check-input"
+                        [id]="'add-day-' + day"
+                        [value]="day"
+                        [checked]="isDaySelected(day, 'add')"
+                        (change)="onDayChange($event, 'add')"
+                      >
+                      <label class="form-check-label" [for]="'add-day-' + day">{{ day }}</label>
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <!-- Dedicated day schedule slots -->
+              @if (doctorForm.get('freeDays')?.value?.length > 0) {
+                <div class="day-schedules-config p-3 rounded-3 border">
+                  <span class="small fw-semibold text-dark d-block mb-2">
+                    Ajuster les horaires personnalisés par jour :
+                  </span>
+                  <div class="row g-2">
+                    @for (day of doctorForm.get('freeDays')?.value; track day) {
+                      <div class="col-12 col-md-6">
+                        <div class="day-schedule-row p-2 rounded-2 border bg-white d-flex align-items-center gap-2">
+                          <span class="badge bg-secondary day-config-badge">{{ day }}</span>
+                          <div class="d-flex align-items-center gap-1 flex-grow-1">
+                            <input
+                              type="time"
+                              class="form-control form-control-sm"
+                              [value]="getDayTime(day, 'startTime', 'add')"
+                              (change)="updateDayScheduleTime(day, 'startTime', $any($event.target).value, 'add')"
+                            >
+                            <span class="text-muted small">à</span>
+                            <input
+                              type="time"
+                              class="form-control form-control-sm"
+                              [value]="getDayTime(day, 'endTime', 'add')"
+                              (change)="updateDayScheduleTime(day, 'endTime', $any($event.target).value, 'add')"
+                            >
+                          </div>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Section 4: Présentation -->
+            <div class="form-section mb-4">
+              <h3 class="section-heading mb-3">4. Présentation clinique & Spécificités</h3>
+              <div>
+                <textarea
+                  class="form-control"
+                  rows="3"
+                  formControlName="description"
+                  placeholder="Titres universitaires, pathologies préférentielles, parcours..."
+                ></textarea>
+                @if (description?.invalid && description?.touched) {
+                  <div class="text-danger small mt-1">Minimum 10 caractères si renseigné.</div>
+                }
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+              <button type="button" class="btn btn-light border" (click)="setActiveTab('list')">Annuler</button>
+              <button type="submit" class="btn btn-primary-action" [disabled]="isSubmitting || doctorForm.invalid">
+                <mat-icon class="me-1 small">how_to_reg</mat-icon>
+                <span>{{ isSubmitting ? 'Enregistrement...' : 'Enregistrer le praticien' }}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+  </div>
+</main>
+
+<!-- Unified Modal: Edit Doctor -->
+@if (showEditModal()) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal d-block fade show" tabindex="-1" role="dialog" aria-modal="true" (click)="closeEditModal($event)">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content clean-modal shadow text-start">
+        <div class="modal-header border-bottom">
+          <div>
+            <h2 class="modal-title mb-0">Modifier la fiche praticien</h2>
+            <p class="modal-subtitle text-muted mb-0 small">Mise à jour des coordonnées, du statut et du planning journalier</p>
+          </div>
+          <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+        </div>
+
+        <div class="modal-body py-4">
+          <form [formGroup]="updateForm">
+            <div class="row g-3 mb-3">
+              <div class="col-12 col-md-5">
+                <label class="form-label fw-semibold">Nom complet *</label>
+                <input type="text" class="form-control" formControlName="fullName">
+              </div>
+              <div class="col-12 col-md-4">
+                <label class="form-label fw-semibold">Pôle / Spécialité *</label>
+                <select class="form-select" formControlName="service">
+                  @for (service of services; track service) {
+                    <option [value]="service">{{ service }}</option>
+                  }
+                </select>
+              </div>
+              <div class="col-12 col-md-3">
+                <label class="form-label fw-semibold">Statut médical *</label>
+                <select class="form-select" formControlName="status">
+                  <option value="active">En exercice</option>
+                  <option value="on_leave">En congé</option>
+                  <option value="inactive">Inactif</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Email professionnel *</label>
+                <input type="email" class="form-control" formControlName="email">
+              </div>
+              <div class="col-12 col-md-6">
+                <label class="form-label fw-semibold">Téléphone professionnel *</label>
+                <input type="tel" class="form-control" formControlName="phone">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Adresse / Cabinet *</label>
+              <input type="text" class="form-control" formControlName="address">
+            </div>
+
+            <!-- Planning hebdomadaire personnalisé -->
+            <div class="p-3 rounded-3 bg-light border mb-3">
+              <div class="d-flex flex-wrap justify-content-between align-items-center mb-2">
+                <span class="small fw-semibold text-dark">Horaires de référence :</span>
+                @if (updateForm.get('freeDays')?.value?.length > 0) {
+                  <button type="button" class="btn btn-sm btn-outline-secondary py-1 px-2" (click)="applyHoursToAllDays('update')">
+                    <mat-icon class="small me-1">sync</mat-icon>
+                    <span>Appliquer à tous les jours</span>
+                  </button>
+                }
+              </div>
+              <div class="row g-2">
+                <div class="col-6">
+                  <label class="form-label small mb-1">Début par défaut</label>
+                  <input type="time" class="form-control form-control-sm" formControlName="startTime">
+                </div>
+                <div class="col-6">
+                  <label class="form-label small mb-1">Fin par défaut</label>
+                  <input type="time" class="form-control form-control-sm" formControlName="endTime">
+                </div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold d-block mb-2">Jours d'exercice :</label>
+              <div class="d-flex flex-wrap gap-3">
+                @for (day of days; track day) {
+                  <div class="form-check">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      [id]="'edit-day-' + day"
+                      [value]="day"
+                      [checked]="isDaySelected(day, 'update')"
+                      (change)="onDayChange($event, 'update')"
+                    >
+                    <label class="form-check-label" [for]="'edit-day-' + day">{{ day }}</label>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Per-day schedule configuration -->
+            @if (updateForm.get('freeDays')?.value?.length > 0) {
+              <div class="day-schedules-config p-3 rounded-3 border mb-3">
+                <span class="small fw-semibold text-dark d-block mb-2">
+                  Horaires spécifiques par jour :
+                </span>
+                <div class="row g-2">
+                  @for (day of updateForm.get('freeDays')?.value; track day) {
+                    <div class="col-12 col-md-6">
+                      <div class="day-schedule-row p-2 rounded-2 border bg-white d-flex align-items-center gap-2">
+                        <span class="badge bg-secondary day-config-badge">{{ day }}</span>
+                        <div class="d-flex align-items-center gap-1 flex-grow-1">
+                          <input
+                            type="time"
+                            class="form-control form-control-sm"
+                            [value]="getDayTime(day, 'startTime', 'update')"
+                            (change)="updateDayScheduleTime(day, 'startTime', $any($event.target).value, 'update')"
+                          >
+                          <span class="text-muted small">à</span>
+                          <input
+                            type="time"
+                            class="form-control form-control-sm"
+                            [value]="getDayTime(day, 'endTime', 'update')"
+                            (change)="updateDayScheduleTime(day, 'endTime', $any($event.target).value, 'update')"
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Description clinique</label>
+              <textarea class="form-control" rows="3" formControlName="description"></textarea>
+            </div>
+          </form>
+        </div>
+
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-light border" (click)="closeEditModal()">Annuler</button>
+          <button type="button" class="btn btn-primary-action" (click)="updateDoctor()" [disabled]="updateForm.invalid">
+            <mat-icon class="me-1 small">check</mat-icon>
+            <span>Enregistrer les modifications</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Unified Modal: Delete Doctor -->
+@if (showDeleteModal()) {
+  <div class="modal-backdrop fade show"></div>
+  <div class="modal d-block fade show" tabindex="-1" role="dialog" aria-modal="true" (click)="closeDeleteModal($event)">
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content clean-modal shadow text-start">
+        <div class="modal-header border-bottom">
+          <h2 class="modal-title mb-0">Désactiver la fiche praticien</h2>
+          <button type="button" class="btn-close" (click)="closeDeleteModal()"></button>
+        </div>
+
+        <div class="modal-body py-4">
+          @if (selectedDoctor(); as doc) {
+            <p class="mb-3">
+              Êtes-vous sûr de vouloir désactiver le <strong>Dr. {{ doc.fullName }}</strong> ({{ doc.service }}) ?
+            </p>
+            <div class="alert alert-warning py-2 px-3 small d-flex align-items-center mb-0">
+              <mat-icon class="me-2 small">info</mat-icon>
+              <span>Ce praticien sera archivé et ne sera plus proposé pour la prise de rendez-vous. L'historique médical et les consultations antérieures restent intégralement préservés.</span>
+            </div>
+          }
+        </div>
+
+        <div class="modal-footer border-top">
+          <button type="button" class="btn btn-light border" (click)="closeDeleteModal()">Annuler</button>
+          <button type="button" class="btn btn-warning text-dark fw-semibold" (click)="deactivateDoctor()">
+            <mat-icon class="me-1 small">block</mat-icon>
+            Confirmer la désactivation
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 <app-footer-secretary></app-footer-secretary>

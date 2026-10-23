@@ -12,13 +12,13 @@ export const routes: Routes = [
     },
     {
         path: 'auth',
-        loadChildren: () => import('./components/auth/auth.module')
-        .then(m => m.AuthModule),
+        loadChildren: () => import('./components/auth/auth.routes')
+        .then(m => m.AUTH_ROUTES),
     },
     {
         path: 'doctors',
-        loadChildren: () => import('./components/doctor/doctor.module')
-        .then(m => m.DoctorModule),
+        loadChildren: () => import('./components/doctor/doctor.routes')
+        .then(m => m.DOCTOR_ROUTES),
         canActivate: [RoleGuard],
         data: {
             role: 'doctors'
@@ -26,8 +26,8 @@ export const routes: Routes = [
     },
     {
         path: 'secretaries',
-        loadChildren: () => import('./components/secretary/secretary.module')
-        .then(m => m.SecretaryModule),
+        loadChildren: () => import('./components/secretary/secretary.routes')
+        .then(m => m.SECRETARY_ROUTES),
         canActivate: [RoleGuard],
         data: {
             role: 'secretaries'
@@ -35,8 +35,8 @@ export const routes: Routes = [
     },
     {
         path: 'patients',
-        loadChildren: () => import('./components/patient/patient.module')
-        .then(m => m.PatientModule),
+        loadChildren: () => import('./components/patient/patient.routes')
+        .then(m => m.PATIENT_ROUTES),
         canActivate: [RoleGuard],
         data: {
             role: 'patients'

@@ -1,142 +1,537 @@
-<nav class="navbar navbar-expand-lg">
-    <div class="container-fluid navig ">
-        <a class="navbar-brand border-0 couleur" [routerLink]="['/doctors']">Medico</a>
-        <button class="navbar-toggler bg-white border-white" type="button" data-bs-toggle="collapse"
-            data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-            aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse " id="navbarSupportedContent">
-            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item">
-                    <a class="nav-link active" href="#home">Acceuil</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link active" href="#about">À Propos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#doctors">Docteurs</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#contacts">Contacts</a>
-                </li>
-            </ul>
-            <button class="ms-2 sign" mat-raised-button [routerLink]="['/auth/sign-in']">Connexion</button>
-            <button class="ms-2 sign me-3" mat-raised-button [routerLink]="['/auth/sign-up']">Inscription</button>
+<header class="site-header">
+    <nav class="navbar navbar-expand-lg sticky-top">
+        <div class="container navig">
+            <a class="navbar-brand border-0 couleur text-white d-flex align-items-center fw-bold" [routerLink]="['/']">
+                <i class="bi bi-heart-pulse-fill me-2 fs-5 text-white"></i>
+                <span>Medico</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse " id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link" [class.active]="activeSection() === 'home'" (click)="scrollTo('home', $event)" href="#home">Accueil</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" [class.active]="activeSection() === 'about'" (click)="scrollTo('about', $event)" href="#about">À Propos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" [class.active]="activeSection() === 'doctors'" (click)="scrollTo('doctors', $event)" href="#doctors">Médecins</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" [class.active]="activeSection() === 'contacts'" (click)="scrollTo('contacts', $event)" href="#contacts">Contacts</a>
+                    </li>
+                </ul>
+                <div class="nav-actions-mobile d-flex align-items-center mt-2 mt-lg-0">
+                    <ng-container *ngIf="currentUser(); else guestNavActions">
+                        <a class="btn btn-nav-outline me-2 px-3 py-1 d-inline-flex align-items-center gap-2" (click)="closeMobileMenu()" [routerLink]="[getUserDashboardRoute()]">
+                            <i class="bi bi-speedometer2"></i>
+                            <span>{{ getUserRoleLabel() }}</span>
+                        </a>
+                        <button class="btn btn-outline-light px-3 py-1 shadow-sm" (click)="logout()">
+                            <i class="bi bi-box-arrow-right me-1"></i>Déconnexion
+                        </button>
+                    </ng-container>
+                    <ng-template #guestNavActions>
+                        <button class="btn btn-nav-outline me-2 px-3 py-1" (click)="closeMobileMenu()" [routerLink]="['/auth/sign-in']">Connexion</button>
+                        <button class="btn sign px-3 py-1 me-2 shadow-sm" (click)="closeMobileMenu()" [routerLink]="['/auth/sign-up']">Inscription</button>
+                    </ng-template>
+                </div>
+            </div>
         </div>
-    </div>
-</nav>
-<section id="home">
-    <h2>Acceuil</h2>
-    <div class="text-white ms-0 d-flex flex-column justify-content-center text-capitalize">
-        <h1>Bienvenue À Medico</h1>
-        <h1>L'assistance médicale à votre chevet</h1>
-    </div>
-</section>
+    </nav>
 
-<section id="about">
-    <h2 class="">À Propos de Medico</h2>
-    <div class="container d-flex align-items-center">
-        <div class="">
-            <h2>Description</h2>
-            <p class="color w-100 p-3 m-4">
-                Le Centre Médical Santé+ est un établissement de soins pluridisciplinaire dédié à la santé, à la
-                prévention et au bien-être de chacun. Idéalement situé au cœur de la ville, notre centre propose une
-                offre de soins complète, accessible et moderne, dans un environnement chaleureux et à taille humaine.
-                <br><br><br>
-
-                Notre structure regroupe une équipe de professionnels de santé expérimentés et complémentaires, incluant
-                des médecins généralistes, des spécialistes, des infirmiers, des psychologues et d’autres praticiens
-                paramédicaux. Cette approche collaborative permet d’assurer un suivi médical global et cohérent, centré
-                sur les besoins spécifiques de chaque patient.
+    <section id="home" class="hero-section d-flex align-items-center justify-content-center text-center">
+        <div class="container py-5">
+            <span class="hero-tagline mb-3">Centre Médical Medico</span>
+            <h1 class="hero-title text-white mb-3">L'assistance médicale à votre chevet</h1>
+            <p class="hero-subtitle text-white-50 mx-auto mb-4">
+                Prenez rendez-vous en ligne avec nos praticiens qualifiés et bénéficiez d'une prise en charge rapide, humaine et personnalisée.
             </p>
+            <div class="hero-cta-group d-flex justify-content-center gap-3 flex-wrap">
+                <a class="btn btn-hero-primary px-4 py-2" [routerLink]="['/auth/sign-up']">
+                    <i class="bi bi-calendar-check me-2"></i>Prendre rendez-vous
+                </a>
+                <a class="btn btn-hero-secondary px-4 py-2" (click)="scrollTo('doctors', $event)" href="#doctors">
+                    <i class="bi bi-people me-2"></i>Nos médecins
+                </a>
+            </div>
         </div>
-        <div class="p-3 m-4">
-            <h2>Nos Services</h2>
-            <p class="p-3 m-4">
-                Nous proposons un large éventail de services médicaux accessibles à tous, avec ou sans rendez-vous,
-                notamment :
-            </p>
-            <ul class="">
-                <li>Consultations de médecine générale</li>
-                <li>Pédiatrie</li>
-                <li>Gynécologie et suivi de grossesse</li>
-                <li>Dermatologie</li>
-                <li>Cardiologie</li>
-                <li>Ophtalmologie</li>
-                <li>Consultations en psychologie et santé mentale</li>
-                <li>Vaccinations et bilans de santé</li>
-                <li>Suivi des maladies chroniques (diabète, hypertension, etc.)</li>
-            </ul>
-        </div>
-    </div>
-</section>
+    </section>
+</header>
 
-<section id="doctors">
-    <h2>Nos Medecins</h2>
-    <div class="col-12 col-md-6 col-lg-4 mb-3 d-flex justify-content-center align-items-center w-100" *ngFor="let doctor of allDoctors; let i = index">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Dr. {{ doctor.fullName }} : {{ doctor.service }}</h5>
-                <p class="card-text">
-                    <small class="text-muted">Jours disponibles : {{ doctor.freeDays.join(`,
-                        `) }}</small>
-                </p>
-                <p class="card-text">
-                    <small class="text-muted">Heures : {{ doctor.startTime }} - {{
-                        doctor.endTime }}</small>
-                </p>
-                <p class="card-text">
-                    <small class="text-muted">Description : {{ doctor.description }}</small>
-                </p>
+<section id="about" class="about-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge mb-2">Notre Établissement</span>
+            <h2 class="section-title">À Propos de Medico</h2>
+            <div class="section-divider mx-auto"></div>
+        </div>
+
+        <div class="row g-4 align-items-stretch">
+            <!-- Colonne Présentation -->
+            <div class="col-lg-5 d-flex">
+                <div class="about-card p-4 p-md-5 d-flex flex-column justify-content-between w-100">
+                    <div>
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="bi bi-hospital fs-3 color me-3"></i>
+                            <h3 class="h4 mb-0 color fw-bold">Un centre de soins à votre écoute</h3>
+                        </div>
+                        <p class="about-text text-muted">
+                            Le <strong>Centre Médical Medico</strong> est un établissement de soins pluridisciplinaire dédié à la santé, à la prévention et au bien-être de chacun. Idéalement situé au cœur de la ville, notre centre propose une offre de soins complète, accessible et moderne, dans un environnement chaleureux et à taille humaine.
+                        </p>
+                        <p class="about-text text-muted mb-4">
+                            Notre structure regroupe une équipe de professionnels de santé expérimentés et complémentaires : médecins généralistes, spécialistes et praticiens paramédicaux assurant un suivi médical global et coordonné.
+                        </p>
+                    </div>
+
+                    <div class="about-highlights pt-3 border-top">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span class="small fw-semibold color">Suivi médical personnalisé & continu</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span class="small fw-semibold color">Plateau technique moderne et sécurisé</span>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="bi bi-check-circle-fill text-success me-2"></i>
+                            <span class="small fw-semibold color">Prise de rendez-vous en ligne simple et rapide</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Colonne Services & Spécialités -->
+            <div class="col-lg-7 d-flex">
+                <div class="services-container p-4 p-md-5 w-100">
+                    <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-2">
+                        <div>
+                            <h3 class="h4 mb-1 color fw-bold">Nos Spécialités & Services</h3>
+                            <p class="text-muted small mb-0">Consultations médicales avec ou sans rendez-vous</p>
+                        </div>
+                        <span class="badge bg-light text-muted border px-3 py-2 rounded-pill">9 Spécialités</span>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-pill">
+                                <i class="bi bi-clipboard2-pulse fs-4 mb-2 color"></i>
+                                <span class="service-name">Médecine Générale</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-pill">
+                                <i class="bi bi-emoji-smile fs-4 mb-2 color"></i>
+                                <span class="service-name">Pédiatrie</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-pill">
+                                <i class="bi bi-gender-female fs-4 mb-2 color"></i>
+                                <span class="service-name">Gynécologie & Suivi</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-pill">
+                                <i class="bi bi-heart-pulse fs-4 mb-2 color"></i>
+                                <span class="service-name">Cardiologie</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-pill">
+                                <i class="bi bi-eye fs-4 mb-2 color"></i>
+                                <span class="service-name">Ophtalmologie</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-pill">
+                                <i class="bi bi-bandaid fs-4 mb-2 color"></i>
+                                <span class="service-name">Dermatologie</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-pill">
+                                <i class="bi bi-chat-heart fs-4 mb-2 color"></i>
+                                <span class="service-name">Psychologie & Écoute</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-pill">
+                                <i class="bi bi-capsule fs-4 mb-2 color"></i>
+                                <span class="service-name">Vaccinations & Bilans</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-md-4">
+                            <div class="service-pill">
+                                <i class="bi bi-activity fs-4 mb-2 color"></i>
+                                <span class="service-name">Maladies Chroniques</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-<section id="contacts">
-    <h2>Contactez-nous</h2>
-    <div class="w-50 d-flex justify-content-center align-items-center">
-        <form class="w-75" action="">
-            <input class="w-75" type="text" placeholder="Nom">
-            <input class="w-75" type="text" placeholder="Prénom">
-            <input class="w-75" type="email" placeholder="example@test.essai">
-            <input class="w-75" type="tel" placeholder="+221 77 777 77 77">
-            <textarea class="w-75 big-input" type="text" placeholder="Votre avis?" name="" id=""></textarea>
-            <input class="w-75 button color" type="button" value="Soumettre">
-        </form>
-    </div>
-    <div>
-        
+<section id="doctors" class="doctors-section py-5">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end mb-4">
+            <div class="text-center text-md-start mb-3 mb-md-0">
+                <span class="section-badge mb-2">Nos Praticiens</span>
+                <h2 class="section-title mb-1">Notre Équipe Médicale</h2>
+                <div class="section-divider mb-2 d-none d-md-block"></div>
+                <div class="section-divider mx-auto mb-2 d-md-none"></div>
+                <p class="section-subtitle text-muted mb-0">
+                    Des praticiens experts et dévoués, répartis au sein de nos différents pôles de spécialités pour un accompagnement d'excellence.
+                </p>
+            </div>
+
+            <!-- Boutons de navigation Gauche / Droite -->
+            <div class="d-flex align-items-center justify-content-center justify-content-md-end gap-2" *ngIf="filteredDoctors.length > 0">
+                <span class="small text-muted fw-semibold me-2 d-none d-sm-inline">
+                    {{ filteredDoctors.length }} praticien{{ filteredDoctors.length > 1 ? 's' : '' }}
+                </span>
+                <button type="button" 
+                        class="btn btn-scroll" 
+                        [class.d-lg-none]="filteredDoctors.length <= 2"
+                        (click)="scrollDoctors('left')" 
+                        aria-label="Précédent" 
+                        title="Défiler vers la gauche">
+                    <i class="bi bi-chevron-left"></i>
+                </button>
+                <button type="button" 
+                        class="btn btn-scroll" 
+                        [class.d-lg-none]="filteredDoctors.length <= 2"
+                        (click)="scrollDoctors('right')" 
+                        aria-label="Suivant" 
+                        title="Défiler vers la droite">
+                    <i class="bi bi-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Filtres par Spécialité / Service -->
+        <div class="service-filter-bar d-flex flex-wrap align-items-center justify-content-center justify-content-md-start gap-2 mb-4" *ngIf="allDoctors.length > 0">
+            <button type="button" 
+                    *ngFor="let s of availableServices"
+                    class="btn-service-filter"
+                    [class.active]="selectedService() === s"
+                    (click)="selectService(s)">
+                <i *ngIf="s !== 'Tous'" [class]="'bi ' + getServiceIcon(s) + ' me-1'"></i>
+                <span>{{ s }}</span>
+                <span class="filter-count ms-1" *ngIf="s === 'Tous'">({{ allDoctors.length }})</span>
+            </button>
+        </div>
+
+        <!-- Défilement gracieux sur une seule ligne -->
+        <div class="doctors-carousel-track" 
+             [class.is-centered]="filteredDoctors.length <= 2"
+             id="doctorsScrollContainer" 
+             *ngIf="filteredDoctors.length > 0"
+             (mousedown)="onMouseDown($event)"
+             (mousemove)="onMouseMove($event)"
+             (mouseup)="onMouseUp()"
+             (mouseleave)="onMouseLeave()">
+            <div class="doctor-carousel-item" *ngFor="let doctor of filteredDoctors; let i = index">
+                <div class="doctor-card p-4 d-flex flex-column justify-content-between w-100 h-100">
+                    <div>
+                        <!-- En-tête de la carte avec avatar initiales + badge d'icône du service -->
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="position-relative me-3">
+                                <div class="doctor-avatar">
+                                    <span class="doctor-initials">{{ getDoctorInitials(doctor.fullName) }}</span>
+                                </div>
+                                <span class="doctor-service-icon-badge" [title]="doctor.service">
+                                    <i [class]="'bi ' + getServiceIcon(doctor.service)"></i>
+                                </span>
+                            </div>
+                            <div class="overflow-hidden">
+                                <h3 class="doctor-name mb-1">Dr. {{ doctor.fullName }}</h3>
+                                <span class="badge doctor-badge d-inline-flex align-items-center">
+                                    <i [class]="'bi ' + getServiceIcon(doctor.service) + ' me-1'"></i>
+                                    {{ doctor.service }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Citation / Description soignée -->
+                        <div class="doctor-quote-box mb-3" *ngIf="doctor.description">
+                            <i class="bi bi-quote fs-5 color opacity-50 me-1"></i>
+                            <span class="doctor-description text-muted small">{{ doctor.description }}</span>
+                        </div>
+
+                        <!-- Bloc Disponibilités & Horaires -->
+                        <div class="doctor-schedule-box p-3 rounded-3 mb-3">
+                            <div class="d-flex align-items-start mb-2 small text-muted">
+                                <i class="bi bi-calendar-check me-2 color mt-1"></i>
+                                <div>
+                                    <span class="fw-semibold color">Disponibilités :</span>
+                                    <div class="text-dark">{{ doctor.freeDays.join(', ') }}</div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center small text-muted">
+                                <i class="bi bi-clock-history me-2 color"></i>
+                                <span class="fw-semibold color me-1">Horaires :</span>
+                                <span class="text-dark">{{ doctor.startTime }} - {{ doctor.endTime }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bouton d'action élégant -->
+                    <div class="mt-2 pt-3 border-top">
+                        <a routerLink="/auth/sign-in" class="btn btn-doctor-action w-100 d-flex align-items-center justify-content-center">
+                            <span>Prendre rendez-vous</span>
+                            <i class="bi bi-arrow-right ms-2 btn-action-arrow"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aucun médecin trouvé pour le filtre sélectionné -->
+        <div *ngIf="allDoctors.length > 0 && filteredDoctors.length === 0" class="empty-doctors-card text-center py-5 px-4 mx-auto my-4">
+            <div class="empty-icon-wrapper mb-3 mx-auto">
+                <i class="bi bi-search fs-2 color"></i>
+            </div>
+            <h4 class="h5 fw-bold color mb-2">Aucun praticien pour cette spécialité</h4>
+            <p class="text-muted small mb-3">Sélectionnez une autre spécialité ou affichez l'ensemble de notre équipe médicale.</p>
+            <button type="button" class="btn btn-sm btn-doctor-action px-3" (click)="selectService('Tous')">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Afficher tous les médecins
+            </button>
+        </div>
+
+        <!-- État vide si la base de données est complètement vide -->
+        <div *ngIf="allDoctors.length === 0" class="empty-doctors-card text-center py-5 px-4 mx-auto">
+            <div class="empty-icon-wrapper mb-3 mx-auto">
+                <i class="bi bi-person-badge fs-1 color"></i>
+            </div>
+            <h4 class="h5 fw-bold color mb-2">Praticiens en cours d'intégration</h4>
+            <p class="text-muted small mb-0">Les profils de nos praticiens seront bientôt disponibles sur cette page.</p>
+        </div>
     </div>
 </section>
 
-<div class="justify-content-end d-flex">
-    <a class="bi bi-arrow-up-square" href="#home"></a>
-</div>
-
-<footer class="couleur w-100 m-0">
-    <div class="d-flex justify-content-center  mt-2 align-items-center w-100 border-bottom">  
-        <div class="d-flex flex-column w-50">
-            <a class="mb-2" href="#home">Acceuil</a>
-            <a class="mb-2" href="#about">À Propos</a>
-            <a class="mb-2" href="#doctors">Doctors</a>
-            <a class="mb-2" href="#contacts">Contacs</a>
+<section id="contacts" class="contacts-section py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <span class="section-badge mb-2">Échange & Renseignements</span>
+            <h2 class="section-title">Contactez Notre Centre</h2>
+            <div class="section-divider mx-auto"></div>
         </div>
-        <div class="w-50 text-white ms-5">
-            <h2>Nos Services</h2>
-            <ul class="w-100 d-flex flex-column align-items-start">
-                <li class="mb-2 w-100 text-white">Pédiatrie</li>
-                <li class="mb-2 w-100 text-white">Consultations de médecine générale</li>
-                <li class="mb-2 w-100 text-white">Gynécologie et suivi de grossesse</li>
-                <li class="mb-2 w-100 text-white">Dermatologie</li>
-                <li class="mb-2 w-100 text-white">Cardiologie</li>
-                <li class="mb-2 w-100 text-white">Ophtalmologie</li>
-                <li class="mb-2 w-100 text-white">Consultations en psychologie et santé mentale</li>
-                <li class="mb-2 w-100 text-white">Vaccinations et bilans de santé</li>
-                <li class="mb-2 w-100 text-white">Suivi des maladies chroniques (diabète, hypertension, etc.)</li>
-            </ul>
+
+        <div class="row g-4 align-items-stretch">
+            <!-- Coordonnées & Accès -->
+            <div class="col-lg-5 d-flex">
+                <div class="contact-info-card p-4 p-md-5 d-flex flex-column justify-content-between w-100">
+                    <div>
+                        <h3 class="h4 color fw-bold mb-3">Nous trouver & Échanger</h3>
+                        <p class="text-muted small mb-4">
+                            Notre équipe d'accueil vous oriente pour vos consultations, bilans et urgences médicales courantes.
+                        </p>
+
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="contact-icon-wrapper me-3">
+                                <i class="bi bi-geo-alt-fill color"></i>
+                            </div>
+                            <div>
+                                <h4 class="h6 fw-bold color mb-1">Adresse</h4>
+                                <p class="text-muted small mb-0">Avenue Cheikh Anta Diop, Fann-Point E, Dakar</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="contact-icon-wrapper me-3">
+                                <i class="bi bi-telephone-fill color"></i>
+                            </div>
+                            <div>
+                                <h4 class="h6 fw-bold color mb-1">Téléphone & Accueil</h4>
+                                <p class="text-muted small mb-0">+221 33 824 00 00 / +221 77 123 45 67</p>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="contact-icon-wrapper me-3">
+                                <i class="bi bi-envelope-fill color"></i>
+                            </div>
+                            <div>
+                                <h4 class="h6 fw-bold color mb-1">Courriel</h4>
+                                <p class="text-muted small mb-0">contact@medico-dakar.sn</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-hours-box p-3 rounded-3 mt-3">
+                        <div class="d-flex align-items-center mb-1">
+                            <i class="bi bi-clock-fill color me-2"></i>
+                            <span class="small fw-bold color">Horaires d'ouverture</span>
+                        </div>
+                        <p class="small text-muted mb-0">Du Lundi au Samedi : 08h00 - 20h00</p>
+                        <p class="small text-muted mb-0">Permanence médicale d'orientation disponible 24h/24</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Formulaire de Contact -->
+            <div class="col-lg-7 d-flex">
+                <div class="contact-form-card p-4 p-md-5 w-100">
+                    <h3 class="h4 color fw-bold mb-3">Envoyez-nous un message</h3>
+                    <p class="text-muted small mb-4">
+                        Renseignez ce formulaire pour toute demande de renseignement administratif ou de suivi.
+                    </p>
+
+                    <form class="contact-form">
+                        <div class="row g-3">
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label small fw-semibold color mb-1">Nom</label>
+                                <input class="form-control contact-input" type="text" placeholder="Votre nom">
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label small fw-semibold color mb-1">Prénom</label>
+                                <input class="form-control contact-input" type="text" placeholder="Votre prénom">
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label small fw-semibold color mb-1">Email</label>
+                                <input class="form-control contact-input" type="email" placeholder="nom@exemple.com">
+                            </div>
+                            <div class="col-12 col-sm-6">
+                                <label class="form-label small fw-semibold color mb-1">Téléphone</label>
+                                <input class="form-control contact-input" type="tel" placeholder="+221 77 000 00 00">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold color mb-1">Message</label>
+                                <textarea class="form-control contact-input" rows="4" placeholder="Votre message ou question..."></textarea>
+                            </div>
+                            <div class="col-12 pt-2">
+                                <button type="button" class="btn btn-contact-submit w-100 py-2">
+                                    <i class="bi bi-send-fill me-2"></i>Envoyer le message
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
-    <p class="mb-2 mt-2">&copy; 2025 Mamedi. Tous droits réservés.</p>
+</section>
+
+<div class="back-to-top-wrapper">
+    <a class="btn-back-to-top" (click)="scrollTo('home', $event)" href="#home" title="Retour en haut">
+        <i class="bi bi-chevron-up"></i>
+    </a>
+</div>
+
+<footer class="site-footer couleur text-white">
+    <div class="container py-5">
+        <!-- Top Footer Row / Main Content -->
+        <div class="row g-4 justify-content-between">
+            <!-- Col 1: Brand & Presentation (3 cols) -->
+            <div class="col-12 col-md-6 col-lg-3">
+                <div class="footer-brand d-flex align-items-center mb-3">
+                    <div class="footer-logo-icon me-2">
+                        <i class="bi bi-heart-pulse-fill text-white fs-4"></i>
+                    </div>
+                    <span class="fs-4 fw-bold text-white tracking-wide">Medico</span>
+                </div>
+                <p class="footer-desc text-white-50 small mb-3 pe-lg-2">
+                    Centre de soins pluridisciplinaire d'excellence au cœur de Dakar. Prise en charge coordonnée et humaine pour toute la famille.
+                </p>
+                <div class="footer-emergency-pill d-inline-flex align-items-center px-3 py-2 rounded-3 mb-2">
+                    <i class="bi bi-telephone-inbound-fill text-danger me-2"></i>
+                    <span class="small fw-semibold text-white">Urgences 24h/24 : +221 77 123 45 67</span>
+                </div>
+            </div>
+
+            <!-- Col 2: Navigation (2 cols) -->
+            <div class="col-6 col-md-6 col-lg-2">
+                <h4 class="footer-col-title h6 fw-bold text-white text-uppercase mb-3">Navigation</h4>
+                <ul class="footer-links list-unstyled small mb-0">
+                    <li class="mb-2"><a class="footer-link" (click)="scrollTo('home', $event)" href="#home">Accueil</a></li>
+                    <li class="mb-2"><a class="footer-link" (click)="scrollTo('about', $event)" href="#about">À Propos</a></li>
+                    <li class="mb-2"><a class="footer-link" (click)="scrollTo('doctors', $event)" href="#doctors">Nos Praticiens</a></li>
+                    <li class="mb-2"><a class="footer-link" (click)="scrollTo('contacts', $event)" href="#contacts">Contacts</a></li>
+                    <li class="mb-2"><a class="footer-link" [routerLink]="['/auth/sign-in']">Espace Patient</a></li>
+                </ul>
+            </div>
+
+            <!-- Col 3: Pôles de Soins (4 cols, 2-subcolumn grid) -->
+            <div class="col-12 col-md-6 col-lg-4">
+                <h4 class="footer-col-title h6 fw-bold text-white text-uppercase mb-3">Pôles de Soins</h4>
+                <div class="row row-cols-2 g-2 small">
+                    <div class="col">
+                        <a class="footer-specialty-link" (click)="selectServiceAndScroll('Médecine Générale', $event)" href="#doctors">Médecine Générale</a>
+                    </div>
+                    <div class="col">
+                        <a class="footer-specialty-link" (click)="selectServiceAndScroll('Pédiatrie', $event)" href="#doctors">Pédiatrie</a>
+                    </div>
+                    <div class="col">
+                        <a class="footer-specialty-link" (click)="selectServiceAndScroll('Gynécologie', $event)" href="#doctors">Gynécologie</a>
+                    </div>
+                    <div class="col">
+                        <a class="footer-specialty-link" (click)="selectServiceAndScroll('Cardiologie', $event)" href="#doctors">Cardiologie</a>
+                    </div>
+                    <div class="col">
+                        <a class="footer-specialty-link" (click)="selectServiceAndScroll('Dermatologie', $event)" href="#doctors">Dermatologie</a>
+                    </div>
+                    <div class="col">
+                        <a class="footer-specialty-link" (click)="selectServiceAndScroll('Ophtalmologie', $event)" href="#doctors">Ophtalmologie</a>
+                    </div>
+                    <div class="col">
+                        <a class="footer-specialty-link" (click)="selectServiceAndScroll('Psychologie', $event)" href="#doctors">Psychologie</a>
+                    </div>
+                    <div class="col">
+                        <a class="footer-specialty-link" (click)="selectServiceAndScroll('Dentiste', $event)" href="#doctors">Dentiste</a>
+                    </div>
+                    <div class="col">
+                        <a class="footer-specialty-link" (click)="selectServiceAndScroll('Maladies Chroniques', $event)" href="#doctors">Maladies Chroniques</a>
+                    </div>
+                    <div class="col">
+                        <a class="footer-specialty-link" (click)="selectServiceAndScroll('Vaccinations & Bilans', $event)" href="#doctors">Bilans & Vaccins</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Col 4: Horaires & Localisation (3 cols) -->
+            <div class="col-12 col-md-6 col-lg-3">
+                <h4 class="footer-col-title h6 fw-bold text-white text-uppercase mb-3">Horaires & Accès</h4>
+                <div class="footer-schedule text-white-50 small mb-3">
+                    <div class="d-flex justify-content-between pb-1 border-bottom border-secondary mb-2">
+                        <span>Lun - Ven :</span>
+                        <span class="text-white fw-semibold">08h00 - 20h00</span>
+                    </div>
+                    <div class="d-flex justify-content-between pb-1 border-bottom border-secondary mb-2">
+                        <span>Samedi :</span>
+                        <span class="text-white fw-semibold">08h00 - 18h00</span>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <span>Dimanche :</span>
+                        <span class="text-white-50">Permanence</span>
+                    </div>
+                </div>
+                <p class="footer-address text-white-50 small mb-0">
+                    <i class="bi bi-geo-alt-fill text-white me-2"></i>Avenue Cheikh Anta Diop, Dakar
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Bar / Legal & Copyright -->
+    <div class="footer-bottom-bar border-top border-secondary py-3">
+        <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+            <span class="text-white-50 small">
+                &copy; 2025 Medico Dakar. Tous droits réservés.
+            </span>
+            <div class="footer-legal-links d-flex align-items-center gap-3 small">
+                <span class="text-white-50">Déontologie médicale</span>
+                <span class="text-white-50">•</span>
+                <span class="text-white-50">Confidentialité des données</span>
+                <span class="text-white-50">•</span>
+                <a class="text-white-50 text-decoration-none" [routerLink]="['/auth/sign-in']">Connexion</a>
+            </div>
+        </div>
+    </div>
 </footer>

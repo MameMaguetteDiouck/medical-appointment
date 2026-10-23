@@ -1,70 +1,154 @@
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="text-center col-lg-8 col-sm-8 col-xs-12 card border-black p-3">
-        <h2 class="text-primary">Inscription dans Medico</h2>
-        <form class="example-form" [formGroup]="authForm" (ngSubmit)="onSubmit()">
-            <div class="d-flex justify-content-between">
-                <mat-form-field appearance="outline" class="w-50 me-2 d-block">
-                    <mat-label>Prénom</mat-label>
-                    <input matInput formControlName="firstName">
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="w-50 ms-2 d-block">
-                    <mat-label>Nom</mat-label>
-                    <input matInput formControlName="lastName">
-                </mat-form-field>
-            </div>
-            <div class="d-flex">
-                <mat-form-field appearance="outline" class="w-50 me-2 d-block">
-                    <mat-label>Email</mat-label>
-                    <input matInput formControlName="email">
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="w-50 ms-2 d-block">
-                    <mat-label>Téléphone</mat-label>
-                    <input matInput formControlName="phone">
-                </mat-form-field>
-            </div>
-            <div class="d-flex">
-                <mat-form-field appearance="outline" class="w-50 me-2 d-block">
-                    <mat-label>Date de Naissance</mat-label>
-                    <input type="date" matInput formControlName="birthDate">
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="w-50 ms-2 d-block">
-                    <mat-label>Addresse</mat-label>
-                    <input matInput formControlName="address">
-                </mat-form-field>
-            </div>
-            <div class="d-flex">
-                <mat-form-field class="example-full-width w-100" appearance="outline">
-                    <mat-label>Parlez-nous de toi (tes malades, tes antécédants, etc...)</mat-label>
-                    <textarea matInput placeholder="Exemple: je souffrai ..." formControlName="description"></textarea>
-                </mat-form-field>
-            </div>
-            <div class="d-flex">
-                <mat-form-field appearance="outline" class="w-50 me-2 d-block">
-                    <mat-label>Mot de Pass</mat-label>
-                    <input matInput type="password" formControlName="password">
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="w-50 ms-2 d-block">
-                    <mat-label>Confirmation de Mot de Pass</mat-label>
-                    <input matInput type="password" formControlName="passwordConfirmed">
-                </mat-form-field>
-            </div>
-            <!-- Error Message -->
-            <div class="alert alert-danger p2 d-flex align-items-center" *ngIf="errorMessage ">
-                <mat-icon>info</mat-icon>
-                {{errorMessage}}
+<div class="auth-page-wrapper d-flex align-items-center justify-content-center min-vh-100 py-5 px-3">
+    <div class="auth-card-container auth-card-wide w-100">
+        <!-- Return to Home Link -->
+        <div class="mb-3">
+            <a [routerLink]="['/']" class="btn-back-home d-inline-flex align-items-center text-decoration-none">
+                <i class="bi bi-arrow-left me-2"></i>
+                <span>Retour à l'accueil</span>
+            </a>
+        </div>
+
+        <!-- Main Auth Card -->
+        <div class="auth-card p-4 p-sm-5 bg-white shadow-lg">
+            <!-- Brand & Header -->
+            <div class="text-center mb-4">
+                <div class="auth-logo-badge mx-auto mb-3">
+                    <i class="bi bi-heart-pulse-fill fs-3 text-white"></i>
+                </div>
+                <h1 class="h3 fw-bold color mb-2">Création de Dossier Patient</h1>
+                <p class="text-muted small mb-0">
+                    Renseignez vos informations pour réserver vos rendez-vous et accéder à votre suivi médical.
+                </p>
             </div>
 
-            <!-- In progess -->
-            <div class="d-flex align-items-center" *ngIf="isSubmissionInProgress">
-                <mat-spinner [diameter]="22"></mat-spinner>
-                Connexion en cours...
+            <!-- Sign Up Form -->
+            <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="auth-form">
+                <div class="row g-3">
+                    <!-- Prénom -->
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold color mb-1">Prénom *</label>
+                        <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                            <mat-icon matPrefix class="me-2 text-muted">person_outline</mat-icon>
+                            <input matInput formControlName="firstName" placeholder="Votre prénom" autocomplete="given-name">
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Nom -->
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold color mb-1">Nom *</label>
+                        <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                            <mat-icon matPrefix class="me-2 text-muted">badge</mat-icon>
+                            <input matInput formControlName="lastName" placeholder="Votre nom" autocomplete="family-name">
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold color mb-1">Adresse Email *</label>
+                        <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                            <mat-icon matPrefix class="me-2 text-muted">mail_outline</mat-icon>
+                            <input matInput type="email" formControlName="email" placeholder="nom@exemple.com" autocomplete="email">
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Téléphone -->
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold color mb-1">Téléphone *</label>
+                        <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                            <mat-icon matPrefix class="me-2 text-muted">phone</mat-icon>
+                            <input matInput formControlName="phone" placeholder="ex: 771234567" autocomplete="tel">
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Date de Naissance -->
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold color mb-1">Date de naissance *</label>
+                        <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                            <mat-icon matPrefix class="me-2 text-muted">cake</mat-icon>
+                            <input matInput type="date" formControlName="birthDate">
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Adresse -->
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold color mb-1">Adresse / Ville *</label>
+                        <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                            <mat-icon matPrefix class="me-2 text-muted">location_on</mat-icon>
+                            <input matInput formControlName="address" placeholder="ex: Point E, Dakar" autocomplete="street-address">
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Antécédents médicaux / Description -->
+                    <div class="col-12">
+                        <label class="form-label small fw-semibold color mb-1">Antécédents médicaux / Notes pour le praticien *</label>
+                        <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                            <mat-icon matPrefix class="me-2 text-muted">description</mat-icon>
+                            <textarea matInput rows="3" formControlName="description" placeholder="Allergies connues, traitements en cours, groupe sanguin ou motif général..."></textarea>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Mot de passe -->
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold color mb-1">Mot de passe *</label>
+                        <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                            <mat-icon matPrefix class="me-2 text-muted">lock_outline</mat-icon>
+                            <input matInput [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="Min. 6 caractères" autocomplete="new-password">
+                            <button type="button" mat-icon-button matSuffix (click)="togglePasswordVisibility()" [attr.aria-label]="'Afficher le mot de passe'" class="text-muted">
+                                <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Confirmation Mot de passe -->
+                    <div class="col-12 col-md-6">
+                        <label class="form-label small fw-semibold color mb-1">Confirmation du mot de passe *</label>
+                        <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                            <mat-icon matPrefix class="me-2 text-muted">lock</mat-icon>
+                            <input matInput [type]="showPasswordConfirmed() ? 'text' : 'password'" formControlName="passwordConfirmed" placeholder="Retapez le mot de passe" autocomplete="new-password">
+                            <button type="button" mat-icon-button matSuffix (click)="togglePasswordConfirmedVisibility()" [attr.aria-label]="'Afficher le mot de passe de confirmation'" class="text-muted">
+                                <mat-icon>{{ showPasswordConfirmed() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            </button>
+                        </mat-form-field>
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div class="col-12" *ngIf="errorMessage()">
+                        <div class="alert alert-danger d-flex align-items-center py-2 px-3 rounded-3 mb-0 border-0 small">
+                            <i class="bi bi-exclamation-triangle-fill me-2 fs-6 flex-shrink-0"></i>
+                            <span>{{ errorMessage() }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="col-12 pt-2">
+                        <button type="submit" class="btn btn-auth-primary w-100 py-3 d-flex align-items-center justify-content-center" [disabled]="isSubmissionInProgress()">
+                            <span *ngIf="!isSubmissionInProgress()">Créer mon compte Patient</span>
+                            <span *ngIf="isSubmissionInProgress()" class="d-flex align-items-center">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                <span>Création du dossier en cours...</span>
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <!-- Divider -->
+            <div class="auth-divider my-4 position-relative text-center">
+                <span class="bg-white px-3 text-muted small">Vous possédez déjà un compte ?</span>
             </div>
-            <div class="d-flex justify-content-center align-items-center">
-                <button type="submit" mat-raised-button class="w-50 d-block mb-2 sign">Inscription</button>
+
+            <!-- Sign In Link -->
+            <div class="text-center">
+                <a [routerLink]="['/auth/sign-in']" class="btn btn-auth-secondary w-100 py-2 d-flex align-items-center justify-content-center text-decoration-none">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    <span>Se connecter à mon espace</span>
+                </a>
             </div>
-        </form>
-        <div class="d-flex justify-content-center align-items-center">
-            <button mat-raised-button class="w-50 p-2 mt-2 d-lg-block sign" [routerLink]="['/auth/sign-in']">J'ai déjà un compte?</button>
+        </div>
+
+        <!-- Bottom Footer info -->
+        <div class="text-center mt-3 text-muted small">
+            <span>&copy; 2025 Centre Médical Medico • Vos données médicales sont strictement confidentielles</span>
         </div>
     </div>
 </div>

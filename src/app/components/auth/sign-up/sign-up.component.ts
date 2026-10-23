@@ -1,11 +1,9 @@
-import { Component, inject } from '@angular/core';
-import { Auth, AuthErrorCodes, createUserWithEmailAndPassword } from '@angular/fire/auth';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { materialImports } from '../../../material.imports';
 import { CommonModule } from '@angular/common';
-import { Patient } from '../../../shared/interfaces/patient';
-import { PatientService } from '../../../shared/services/patient.service';
+import { AuthService } from '../../../shared/services/auth.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -13,93 +11,87 @@ import { PatientService } from '../../../shared/services/patient.service';
   templateUrl: './sign-up.component.html',
   styleUrl: './sign-up.component.css'
 })
-export class SignUpComponent {
-  authForm!: FormGroup;
+export class SignUpComponent implements OnInit {
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  patientObj: Patient = {
-    id: '',
-    firstName: '',
-    lastName: '',
-    address: '',
-    phone: 0,
-    birthDate: undefined,
-    email: '',
-    description: '',
-    status: 'patient',
+  authForm = new FormGroup({
+    firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
+    lastName: new FormControl('', [Validators.required, Validators.minLength(2)]),
+    address: new FormControl('', [Validators.required, Validators.minLength(2)]),
+    description: new FormControl('', [Validators.required, Validators.minLength(5)]),
+    birthDate: new FormControl('', Validators.required),
+    phone: new FormControl('', [Validators.required, Validators.pattern(/^(?:\+221|00221)?7[05678]\d{7}$/)]),
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required, Validators.minLength(6)]),
+    passwordConfirmed: new FormControl('', [Validators.required]),
+  });
+
+  isSubmissionInProgress = signal<boolean>(false);
+  errorMessage = signal<string>('');
+  showPassword = signal<boolean>(false);
+  showPasswordConfirmed = signal<boolean>(false);
+
+  async ngOnInit() {
+    const currentUser = this.authService.currentUser;
+    if (currentUser) {
+      const role = await this.authService.getUserRole(currentUser);
+      if (role) {
+        this.router.navigate([`/${role}`]);
+      }
+    }
   }
 
-  //instancier le auth
-  auth = inject(Auth);
-
-  isSubmissionInProgress: boolean = false;
-  falg: boolean = false;
-  errorMessage: string = '';
-  constructor(private router: Router, private data: PatientService) {
-    this.intitForm();
-  }
-  intitForm() {
-    this.authForm = new FormGroup({
-      firstName: new FormControl('', [Validators.required, Validators.minLength(2)]),
-      lastName: new FormControl('', [Validators.required, Validators.minLength(2)]),
-      address: new FormControl('', [Validators.required, Validators.minLength(2)]),
-      description: new FormControl('', [Validators.required, Validators.minLength(25)]),
-      birthDate: new FormControl('', Validators.required),
-      phone: new FormControl('', [Validators.required, Validators.pattern(/^(?:\+221|00221)?7[05678]\d{7}$/)]),
-      email: new FormControl('', Validators.required),
-      password: new FormControl('', Validators.required),
-      passwordConfirmed: new FormControl('', Validators.required),
-    })
+  togglePasswordVisibility() {
+    this.showPassword.update(v => !v);
   }
 
-  onSubmit() {
-    if (this.authForm.invalid)
-      return;
+  togglePasswordConfirmedVisibility() {
+    this.showPasswordConfirmed.update(v => !v);
+  }
 
-    if (this.authForm.value.password != this.authForm.value.passwordConfirmed) {
-      this.errorMessage = 'Confirmez votre password...';
-      console.log(this.authForm.value.password, this.authForm.value.passwordConfirmed);
+  async onSubmit() {
+    if (this.authForm.invalid) {
+      this.errorMessage.set('Veuillez renseigner tous les champs obligatoires avec un format valide.');
       return;
     }
-    
-    this.isSubmissionInProgress = true;
 
-    createUserWithEmailAndPassword(this.auth, this.authForm.value.email, this.authForm.value.password)
-      .then(response => {
-        const patientId = response.user.uid;
-        const { passwordConfirmed, password, ...rest } = this.authForm.value;
-        this.patientObj = {
-          ...rest,
-          id: patientId,
-          status: 'patients'
-        };
-        console.log('', this.patientObj);
+    const { password, passwordConfirmed, email, phone, ...patientData } = this.authForm.value;
 
-        this.data.addPatient(this.patientObj)
-          .then(() => {
-            this.redirectToDashboardPage();
-          })
-      })
-      .catch(error => {
-        this.isSubmissionInProgress = false;
-        console.error('error', error);
-        if (error instanceof Error) {
-          if (error.message.includes(AuthErrorCodes.INVALID_EMAIL)) {
-            this.errorMessage = 'L\'email n\'est pas valide.';
-          } else if (error.message.includes('auth/invalid-credential')) {
-            this.errorMessage = 'Email ou Password invalide.';
-          } else if (error.message.includes(AuthErrorCodes.WEAK_PASSWORD)) {
-            this.errorMessage = 'Entrez un password robuste.';
-          } else if (error.message.includes(AuthErrorCodes.EMAIL_EXISTS)) {
-            this.errorMessage = 'Cet email est utilisé par un autre utilisateur.';
-          } else {
-            this.errorMessage = 'quelque chose a mal tourné, veuillez réessayer.';
-          }
-        }
+    if (password !== passwordConfirmed) {
+      this.errorMessage.set('Les deux mots de passe ne correspondent pas.');
+      return;
+    }
+
+    this.isSubmissionInProgress.set(true);
+    this.errorMessage.set('');
+
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanPhone = (phone || '').trim();
+
+    try {
+      await this.authService.signUpPatient(cleanEmail, password!, {
+        ...patientData,
+        phone: cleanPhone
       });
-
+      this.router.navigate(['/patients']);
+    } catch (error: any) {
+      this.handleSignUpError(error);
+    } finally {
+      this.isSubmissionInProgress.set(false);
+    }
   }
-  redirectToDashboardPage() {
-    this.router.navigate(['/patients/']);
-  }
 
+  private handleSignUpError(error: any) {
+    const code = error?.code || '';
+    if (code === 'auth/email-already-in-use') {
+      this.errorMessage.set('Cette adresse email est déjà associée à un compte patient.');
+    } else if (code === 'auth/weak-password') {
+      this.errorMessage.set('Le mot de passe doit comporter au moins 6 caractères.');
+    } else if (code === 'auth/invalid-email') {
+      this.errorMessage.set("Le format de l'adresse email n'est pas valide.");
+    } else {
+      this.errorMessage.set("Une erreur est survenue lors de l'inscription. Veuillez réessayer.");
+    }
+  }
 }

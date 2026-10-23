@@ -1,10 +1,88 @@
-<footer style=>
-    <div class="d-flex justify-content-center  mt-2 align-items-center w-100 border-bottom">  
-        <div class="d-flex justify-content-center m- h-100 align-items-center w-50">
-            <p class="ms-2"><a [routerLink]="['/doctors']">Acceuil</a></p>
-            <!-- <p class="ms-2"><a class="nav-link" [routerLink]="['/doctors/prescriptions']">Prescription</a></p> -->
-            <p class="ms-2"><a class="nav-link" [routerLink]="['/doctors/patients']">Mes Patients</a></p>
+<footer class="site-footer couleur text-white">
+  <div class="container py-5">
+    <div class="row g-4 justify-content-between">
+      <!-- Col 1: Brand & Presentation -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="footer-brand d-flex align-items-center mb-3">
+          <div class="footer-logo-icon me-2">
+            <i class="bi bi-heart-pulse-fill text-white fs-4"></i>
+          </div>
+          <span class="fs-4 fw-bold text-white tracking-wide">Medico</span>
         </div>
+        <p class="footer-desc text-white-50 small mb-3 pe-lg-2">
+          Centre de soins pluridisciplinaire d'excellence au cœur de Dakar. Prise en charge coordonnée et humaine pour toute la famille.
+        </p>
+        <div class="footer-emergency-pill d-inline-flex align-items-center px-3 py-2 rounded-3 mb-2">
+          <i class="bi bi-telephone-inbound-fill text-danger me-2"></i>
+          <span class="small fw-semibold text-white">Urgences 24h/24 : +221 77 123 45 67</span>
+        </div>
+      </div>
+
+      <!-- Col 2: Navigation -->
+      <div class="col-6 col-md-6 col-lg-2">
+        <h4 class="footer-col-title h6 fw-bold text-white text-uppercase mb-3">Navigation</h4>
+        <ul class="footer-links list-unstyled small mb-0">
+          <li class="mb-2"><a class="footer-link" [routerLink]="['/']">Accueil du site</a></li>
+          <li class="mb-2"><a class="footer-link" [routerLink]="['/doctors']">Tableau de bord</a></li>
+          <li class="mb-2"><a class="footer-link" [routerLink]="['/doctors/patients']">Mes Patients</a></li>
+          <li class="mb-2"><a class="footer-link" [routerLink]="['/doctors/prescriptions']">Ordonnances</a></li>
+        </ul>
+      </div>
+
+      <!-- Col 3: Pôles de Soins -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <h4 class="footer-col-title h6 fw-bold text-white text-uppercase mb-3">Pôles de Soins</h4>
+        <div class="row row-cols-2 g-2 small">
+          <div class="col"><span class="footer-specialty-link">Médecine Générale</span></div>
+          <div class="col"><span class="footer-specialty-link">Pédiatrie</span></div>
+          <div class="col"><span class="footer-specialty-link">Gynécologie</span></div>
+          <div class="col"><span class="footer-specialty-link">Cardiologie</span></div>
+          <div class="col"><span class="footer-specialty-link">Dermatologie</span></div>
+          <div class="col"><span class="footer-specialty-link">Ophtalmologie</span></div>
+          <div class="col"><span class="footer-specialty-link">Psychologie</span></div>
+          <div class="col"><span class="footer-specialty-link">Dentiste</span></div>
+          <div class="col"><span class="footer-specialty-link">Maladies Chroniques</span></div>
+          <div class="col"><span class="footer-specialty-link">Bilans & Vaccins</span></div>
+        </div>
+      </div>
+
+      <!-- Col 4: Horaires & Localisation -->
+      <div class="col-12 col-md-6 col-lg-3">
+        <h4 class="footer-col-title h6 fw-bold text-white text-uppercase mb-3">Horaires & Accès</h4>
+        <div class="footer-schedule text-white-50 small mb-3">
+          <div class="d-flex justify-content-between pb-1 border-bottom border-secondary mb-2">
+            <span>Lun - Ven :</span>
+            <span class="text-white fw-semibold">08h00 - 20h00</span>
+          </div>
+          <div class="d-flex justify-content-between pb-1 border-bottom border-secondary mb-2">
+            <span>Samedi :</span>
+            <span class="text-white fw-semibold">08h00 - 18h00</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span>Dimanche :</span>
+            <span class="text-white-50">Permanence</span>
+          </div>
+        </div>
+        <p class="footer-address text-white-50 small mb-0">
+          <i class="bi bi-geo-alt-fill text-white me-2"></i>Avenue Cheikh Anta Diop, Dakar
+        </p>
+      </div>
     </div>
-    <p class="mb-2 mt-2">&copy; 2025 Mamedi. Tous droits réservés.</p>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="footer-bottom-bar border-top border-secondary py-3">
+    <div class="container d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2">
+      <span class="text-white-50 small">
+        &copy; 2025 Medico Dakar. Tous droits réservés.
+      </span>
+      <div class="footer-legal-links d-flex align-items-center gap-3 small">
+        <span class="text-white-50">Déontologie médicale</span>
+        <span class="text-white-50">•</span>
+        <span class="text-white-50">Confidentialité des données</span>
+        <span class="text-white-50">•</span>
+        <span class="text-white-50">Espace Médecin</span>
+      </div>
+    </div>
+  </div>
 </footer>

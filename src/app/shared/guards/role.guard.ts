@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {
   CanActivate,
+  CanActivateFn,
   ActivatedRouteSnapshot,
   RouterStateSnapshot,
   Router
@@ -26,7 +27,7 @@ export class RoleGuard implements CanActivate {
       return false;
     }
 
-    const userRole = await this.authService.getUserRole(user.email!);
+    const userRole = await this.authService.getUserRole(user);
     const expectedRole = route.data['role'];
 
     if (userRole === expectedRole) {
@@ -48,3 +49,7 @@ export class RoleGuard implements CanActivate {
     });
   }
 }
+
+export const roleGuard: CanActivateFn = (route, state) => {
+  return inject(RoleGuard).canActivate(route);
+};

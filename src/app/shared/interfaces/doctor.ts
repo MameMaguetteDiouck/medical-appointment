@@ -5,9 +5,13 @@ export interface Doctor {
   service: string;
   freeDays: string[];
   startTime: string;
-  doctorName: string;
+  doctorName?: string;
   endTime: string;
   description: string;
   email: string;
   phone: string;
+  status?: 'active' | 'on_leave' | 'inactive';
+  weeklySchedule?: { [day: string]: { startTime: string; endTime: string } };
+  mustChangePassword?: boolean;
+  authUid?: string;
 }

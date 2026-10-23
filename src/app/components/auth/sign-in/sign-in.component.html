@@ -1,73 +1,87 @@
-<div class="d-flex justify-content-center align-items-center min-vh-100">
-    <div class="text-center col-lg-4 col-sm-8 col-xs-12 card border-black p-3">
-        <h2 class="text-primary">Bienvenue dans Medico</h2>
-        <form *ngIf="welcome" class="example-form" [formGroup]="authForm" (ngSubmit)="onSubmitEmail()">
-            <mat-form-field appearance="outline" class=" d-block">
-                <mat-label>Email</mat-label>
-                <input matInput formControlName="email">
-            </mat-form-field>
-            <!-- Error Message -->
-            <div class="alert alert-danger p2 d-flex align-items-center" *ngIf="errorMessage ">
-                <mat-icon>info</mat-icon>
-                {{errorMessage}}
-            </div>
-            <!-- In progess -->
-            <div class="d-flex align-items-center" *ngIf="isSubmissionInProgress">
-                <mat-spinner [diameter]="22"></mat-spinner>
-                Connexion en cours...
-            </div>
-            <button type="submit" mat-raised-button class="w-100 mb-2 sign">Soumettre</button>
-        </form>
-        <form *ngIf="isPatient" class="example-form" [formGroup]="authForm" (ngSubmit)="onSubmit()">
-            <mat-form-field appearance="outline" class=" d-block">
-                <mat-label>Email</mat-label>
-                <input matInput formControlName="email">
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="d-block">
-                <mat-label>Mot de Pass</mat-label>
-                <input matInput type="password" formControlName="password">
-            </mat-form-field>
-            <a class="d-flex justify-content-end mb-3" [routerLink]="['/auth/forgot-password']">Mot de pass oublié?</a>
-            <!-- Error Message -->
-            <div class="alert alert-danger p2 d-flex align-items-center" *ngIf="errorMessage ">
-                <mat-icon>info</mat-icon>
-                {{errorMessage}}
+<div class="auth-page-wrapper d-flex align-items-center justify-content-center min-vh-100 py-5 px-3">
+    <div class="auth-card-container w-100">
+        <!-- Return to Home Link -->
+        <div class="mb-3">
+            <a [routerLink]="['/']" class="btn-back-home d-inline-flex align-items-center text-decoration-none">
+                <i class="bi bi-arrow-left me-2"></i>
+                <span>Retour à l'accueil</span>
+            </a>
+        </div>
+
+        <!-- Main Auth Card -->
+        <div class="auth-card p-4 p-sm-5 bg-white shadow-lg">
+            <!-- Brand & Header -->
+            <div class="text-center mb-4">
+                <div class="auth-logo-badge mx-auto mb-3">
+                    <i class="bi bi-heart-pulse-fill fs-3 text-white"></i>
+                </div>
+                <h1 class="h3 fw-bold color mb-2">Espace Connexion</h1>
+                <p class="text-muted small mb-0">
+                    Accédez à votre espace sécurisé Medico (Patient, Praticien ou Secrétariat).
+                </p>
             </div>
 
-            <!-- In progess -->
-            <div class="d-flex align-items-center" *ngIf="isSubmissionInProgress">
-                <mat-spinner [diameter]="22"></mat-spinner>
-                Connexion en cours...
-            </div>
-            <button type="submit" mat-raised-button class="w-100 mb-2 sign">Connexion</button>
-        </form>
-        <form *ngIf="isDoctor" class="example-form" [formGroup]="authForm" (ngSubmit)="onSubmitDoctor()">
-            <mat-form-field appearance="outline" class=" d-block">
-                <mat-label>Email</mat-label>
-                <input matInput formControlName="email">
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="d-block">
-                <mat-label>Mot de Pass</mat-label>
-                <input matInput type="password" formControlName="password">
-            </mat-form-field>
-            <mat-form-field appearance="outline" class="d-block">
-                <mat-label>Confirmation du Mot de pass</mat-label>
-                <input matInput type="password" formControlName="passwordConfirmed">
-            </mat-form-field>
-            <a class="d-flex justify-content-end mb-3" [routerLink]="['/auth/forgot-password']">Mot de pass oublié?</a>
-            <!-- Error Message -->
-            <div class="alert alert-danger p2 d-flex align-items-center" *ngIf="errorMessage ">
-                <mat-icon>info</mat-icon>
-                {{errorMessage}}
+            <!-- Login Form -->
+            <form [formGroup]="authForm" (ngSubmit)="onSubmit()" class="auth-form">
+                <!-- Email Field -->
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold color mb-1">Adresse Email</label>
+                    <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                        <mat-icon matPrefix class="me-2 text-muted">mail_outline</mat-icon>
+                        <input matInput type="email" formControlName="email" placeholder="votre.email@exemple.com" autocomplete="email">
+                    </mat-form-field>
+                </div>
+
+                <!-- Password Field -->
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <label class="form-label small fw-semibold color mb-0">Mot de passe</label>
+                        <a [routerLink]="['/auth/forgot-password']" class="auth-link-forgot small text-decoration-none">
+                            Mot de passe oublié ?
+                        </a>
+                    </div>
+                    <mat-form-field appearance="outline" class="w-100 auth-form-field">
+                        <mat-icon matPrefix class="me-2 text-muted">lock_outline</mat-icon>
+                        <input matInput [type]="showPassword() ? 'text' : 'password'" formControlName="password" placeholder="••••••••" autocomplete="current-password">
+                        <button type="button" mat-icon-button matSuffix (click)="togglePasswordVisibility()" [attr.aria-label]="'Afficher le mot de passe'" class="text-muted">
+                            <mat-icon>{{ showPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                        </button>
+                    </mat-form-field>
+                </div>
+
+                <!-- Error Alert -->
+                <div class="alert alert-danger d-flex align-items-center py-2 px-3 rounded-3 mb-3 border-0 small" *ngIf="errorMessage()">
+                    <i class="bi bi-exclamation-triangle-fill me-2 fs-6 flex-shrink-0"></i>
+                    <span>{{ errorMessage() }}</span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-auth-primary w-100 py-3 mt-2 d-flex align-items-center justify-content-center" [disabled]="isSubmissionInProgress()">
+                    <span *ngIf="!isSubmissionInProgress()">Se connecter</span>
+                    <span *ngIf="isSubmissionInProgress()" class="d-flex align-items-center">
+                        <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                        <span>Connexion en cours...</span>
+                    </span>
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="auth-divider my-4 position-relative text-center">
+                <span class="bg-white px-3 text-muted small">Nouveau sur Medico ?</span>
             </div>
 
-            <!-- In progess -->
-            <div class="d-flex align-items-center" *ngIf="isSubmissionInProgress">
-                <mat-spinner [diameter]="22"></mat-spinner>
-                Connexion en cours...
+            <!-- Sign Up CTA -->
+            <div class="text-center">
+                <a [routerLink]="['/auth/sign-up']" class="btn btn-auth-secondary w-100 py-2 d-flex align-items-center justify-content-center text-decoration-none">
+                    <i class="bi bi-person-plus me-2"></i>
+                    <span>Créer un compte Patient</span>
+                </a>
             </div>
-            <button type="submit" mat-raised-button class="w-100 mb-2 sign">Connexion</button>
-        </form>
-        <button mat-raised-button class="w-100 mt-2 sign" [routerLink]="['/auth/sign-up']">Inscription</button>
+        </div>
+
+        <!-- Bottom Footer info -->
+        <div class="text-center mt-3 text-muted small">
+            <span>&copy; 2025 Centre Médical Medico • Accès sécurisé SSL</span>
+        </div>
     </div>
 </div>

@@ -1,26 +1,19 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { HomeSecretaryComponent } from './component/home-secretary/home-secretary.component';
 import { ManagementDoctorComponent } from './component/management-doctor/management-doctor.component';
 import { ValidateAppointementComponent } from './component/validate-appointement/validate-appointement.component';
 
-const routes: Routes = [
+export const SECRETARY_ROUTES: Routes = [
   {
     path: '',
-    component: HomeSecretaryComponent,
+    component: HomeSecretaryComponent
   },
   {
     path: 'management-doctors',
-    component: ManagementDoctorComponent,
+    component: ManagementDoctorComponent
   },
   {
     path: 'validate-appointment',
-    component: ValidateAppointementComponent,
+    component: ValidateAppointementComponent
   }
 ];
-
-@NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
-})
-export class SecretaryRoutingModule { }

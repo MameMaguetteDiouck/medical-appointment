@@ -1,88 +1,626 @@
 <app-navbar-doctor></app-navbar-doctor>
 
-<div class="main">
-    <div class="container text-center d-flex flex-column mt-5">
-        <h2 class="color">Mes Rendez-vous d'aujourd'hui</h2>
-
-        <div class="w-100">
-            <h2 class="m-3">Les rendez-vous confimé</h2>
-            <mat-accordion class="w-100">
-                <mat-expansion-panel class="mb-2" *ngFor="let appointment of allAppointmentForToday"
-                    (opened)="panelOpenState.set(true)" (closed)="panelOpenState.set(false)">
-                    <mat-expansion-panel-header>
-                        <mat-panel-title>
-                            <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                            </ng-container>
-                        </mat-panel-title>
-                        <mat-panel-description>
-                            Détails {{panelOpenState() ? 'Ouverts' : 'fermés'}}
-                        </mat-panel-description>
-                    </mat-expansion-panel-header>
-                    <p>Date: {{appointment.day}}</p>
-                    <p>Heure du rv: {{appointment.hourStart}}</p>
-                    <p>{{appointment.descriptionSick}}</p>
-                    <div class="mb-3 w-100 d-flex flex-column alert alert-danger" *ngIf="errorMessage">
-                        {{errorMessage}}
-                    </div>
-                    <button type="button" class="btn btn-success me-2" data-bs-toggle="modal"
-                        [attr.data-bs-target]="'#confirmedAppointment-' + appointment.id">
-                        Confirmer le rendez-vous
-                    </button>
-
-                    <!-- Modal Confirmed-->
-                    <div class="modal fade" [id]="'confirmedAppointment-' + appointment.id" tabindex="-1" role="dialog">
-                        <div class="modal-dialog modal-dialog-centered" role="document">
-                            <div class="modal-content couleur text-white">
-                                <div class="modal-header text-white">
-                                    <h2 class="modal-title" id="exampleModalLongTitle">Confirmation du rv</h2>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
-                                        aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div>
-                                        Voulez-vous confirmer ce rendez-vous de
-                                        <ng-container *ngIf="patientMap[appointment.patientId] | async as patient">
-                                            {{ patient.firstName }} {{ patient.lastName }} : {{appointment.service}}
-                                        </ng-container> ??!!
-                                    </div>
-
-                                    <form [formGroup]="appointmentForm">
-                                        <div class="mb-3 w-100 d-flex flex-column">
-                                            <label class="form-label">doctorObservation</label>
-                                            <textarea matInput formControlName="doctorObservation"></textarea>
-                                        </div>
-                                        <div formArrayName="ordonnance" class="mb-3 d-flex flex-column">
-                                            <div *ngFor="let medocCtrl of ordonnance.controls; let i = index">
-                                                <label>Médicament {{ i + 1 }}</label>
-                                                <input type="text" [formControlName]="i" class="form-control" />
-
-                                                <button type="button" (click)="removeMedoc(i)"
-                                                    class="btn btn-danger btn-sm mt-1">
-                                                    Supprimer
-                                                </button>
-                                            </div>
-
-                                            <button type="button" (click)="addMedoc()" class="btn btn-primary mt-2">
-                                                + Ajouter un médicament
-                                            </button>
-                                        </div>
-
-                                    </form>
-                                    <button type="button" class="btn btn-secondary me-2"
-                                        data-bs-dismiss="modal">Fermer</button>
-                                    <button type="button" class="btn btn-primary me-2" data-bs-dismiss="modal"
-                                        (click)="handleConfirmClick(appointment.id)">
-                                        Confirmer
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </mat-expansion-panel>
-            </mat-accordion>
+<main class="doctor-dashboard-main py-4">
+  <div class="container">
+    <!-- Top Hero Header -->
+    <div class="doctor-hero-card p-4 rounded-4 mb-4 shadow-sm border bg-white">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="doctor-hero-avatar shadow-sm">
+            {{ currentUser()?.fullName ? currentUser()!.fullName.charAt(0).toUpperCase() : 'Dr' }}
+          </div>
+          <div>
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+              <h1 class="doctor-greeting mb-0">
+                Bonjour, Dr. {{ currentUser()?.fullName || 'Praticien' }}
+              </h1>
+              <span class="badge specialty-tag">
+                <mat-icon class="specialty-icon me-1">medical_services</mat-icon>
+                {{ currentUser()?.service || 'Médecine Générale' }}
+              </span>
+            </div>
+            <p class="text-muted small mb-0 d-flex align-items-center gap-1">
+              <mat-icon class="small text-secondary">calendar_today</mat-icon>
+              <span>{{ todayFormatted }}</span>
+              <span class="mx-1">•</span>
+              <span class="text-success fw-medium">Cabinet ouvert</span>
+            </p>
+          </div>
         </div>
+
+        <div class="d-flex align-items-center gap-2">
+          <button
+            type="button"
+            class="btn btn-outline-secondary btn-refresh d-flex align-items-center gap-2"
+            (click)="refreshData()"
+            [disabled]="isRefreshing()"
+            title="Rafraîchir les données"
+          >
+            <mat-icon [class.spin-animation]="isRefreshing()">refresh</mat-icon>
+            <span class="d-none d-sm-inline">Actualiser</span>
+          </button>
+        </div>
+      </div>
     </div>
-</div>
+
+    <!-- Feedback Toast Alert -->
+    @if (feedbackMessage()) {
+      <div
+        class="alert alert-{{ feedbackMessage()!.type }} d-flex align-items-center justify-content-between p-3 rounded-3 shadow-sm mb-4 fade show"
+        role="alert"
+      >
+        <div class="d-flex align-items-center gap-2">
+          <mat-icon>{{ feedbackMessage()!.type === 'success' ? 'check_circle' : 'error' }}</mat-icon>
+          <span>{{ feedbackMessage()!.text }}</span>
+        </div>
+        <button type="button" class="btn-close" (click)="feedbackMessage.set(null)" aria-label="Fermer"></button>
+      </div>
+    }
+
+    <!-- KPI Metric Cards Grid -->
+    <div class="row g-3 mb-4">
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-metric-card p-3 rounded-3 shadow-sm border bg-white h-100 d-flex align-items-center gap-3">
+          <div class="kpi-icon-box kpi-slate">
+            <mat-icon>event_available</mat-icon>
+          </div>
+          <div>
+            <div class="kpi-number">{{ todayCount }}</div>
+            <div class="kpi-label">RDV aujourd'hui</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-metric-card p-3 rounded-3 shadow-sm border bg-white h-100 d-flex align-items-center gap-3">
+          <div class="kpi-icon-box kpi-amber">
+            <mat-icon>hourglass_top</mat-icon>
+          </div>
+          <div>
+            <div class="kpi-number">{{ todayPendingCount }}</div>
+            <div class="kpi-label">À consulter</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-metric-card p-3 rounded-3 shadow-sm border bg-white h-100 d-flex align-items-center gap-3">
+          <div class="kpi-icon-box kpi-teal">
+            <mat-icon>task_alt</mat-icon>
+          </div>
+          <div>
+            <div class="kpi-number">{{ todayCompletedCount }}</div>
+            <div class="kpi-label">Honorés aujourd'hui</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-sm-6 col-xl-3">
+        <div class="kpi-metric-card p-3 rounded-3 shadow-sm border bg-white h-100 d-flex align-items-center gap-3">
+          <div class="kpi-icon-box kpi-neutral">
+            <mat-icon>people_alt</mat-icon>
+          </div>
+          <div>
+            <div class="kpi-number">{{ totalPatientsCount }}</div>
+            <div class="kpi-label">Patients suivis</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Consultations Manager Section -->
+    <div class="consultations-board p-4 rounded-4 shadow-sm border bg-white">
+      <!-- Section Controls -->
+      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-stretch align-items-lg-center gap-3 mb-4 pb-3 border-bottom">
+        <!-- Segmented Tab Filters -->
+        <div class="nav-segment-container d-flex flex-wrap gap-2">
+          <button
+            type="button"
+            class="btn btn-sm nav-segment-btn"
+            [class.active]="activeTab() === 'today-all'"
+            (click)="activeTab.set('today-all')"
+          >
+            <mat-icon class="small me-1">today</mat-icon>
+            <span>Aujourd'hui</span>
+            <span class="badge ms-1 count-pill">{{ todayCount }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-sm nav-segment-btn"
+            [class.active]="activeTab() === 'today-pending'"
+            (click)="activeTab.set('today-pending')"
+          >
+            <mat-icon class="small me-1">pending_actions</mat-icon>
+            <span>À consulter</span>
+            <span class="badge ms-1 count-pill pill-amber">{{ todayPendingCount }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-sm nav-segment-btn"
+            [class.active]="activeTab() === 'today-completed'"
+            (click)="activeTab.set('today-completed')"
+          >
+            <mat-icon class="small me-1">check_circle</mat-icon>
+            <span>Clôturées</span>
+            <span class="badge ms-1 count-pill pill-teal">{{ todayCompletedCount }}</span>
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-sm nav-segment-btn"
+            [class.active]="activeTab() === 'all'"
+            (click)="activeTab.set('all')"
+          >
+            <mat-icon class="small me-1">history</mat-icon>
+            <span>Tout l'historique</span>
+            <span class="badge ms-1 count-pill">{{ allAppointments().length }}</span>
+          </button>
+        </div>
+
+        <!-- Search Input -->
+        <div class="search-box-wrapper">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">
+              <mat-icon class="small text-muted">search</mat-icon>
+            </span>
+            <input
+              type="text"
+              class="form-control form-control-sm border-start-0 ps-0"
+              placeholder="Rechercher patient, motif, heure..."
+              [value]="searchQuery()"
+              (input)="searchQuery.set($any($event.target).value)"
+            >
+            @if (searchQuery()) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary border-start-0"
+                (click)="searchQuery.set('')"
+                title="Effacer la recherche"
+              >
+                <mat-icon class="small">close</mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      @if (isLoading()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary mb-3" role="status"></div>
+          <p class="text-muted small">Chargement des dossiers et rendez-vous du praticien...</p>
+        </div>
+      } @else {
+        <!-- Empty State -->
+        @if (filteredAppointments.length === 0) {
+          <div class="empty-state-box text-center py-5 my-3">
+            <div class="empty-icon-circle mx-auto mb-3">
+              <mat-icon>event_busy</mat-icon>
+            </div>
+            <h3 class="empty-title mb-1">Aucune consultation trouvée</h3>
+            <p class="text-muted small mb-3">
+              @if (searchQuery()) {
+                Aucun rendez-vous ne correspond à votre recherche "{{ searchQuery() }}".
+              } @else if (activeTab() === 'today-pending') {
+                Toutes les consultations du jour ont été honorées !
+              } @else if (activeTab() === 'today-completed') {
+                Aucune consultation n'a encore été clôturée pour aujourd'hui.
+              } @else {
+                Vous n'avez aucun rendez-vous planifié pour cette sélection.
+              }
+            </p>
+            @if (searchQuery()) {
+              <button type="button" class="btn btn-sm btn-light border" (click)="searchQuery.set('')">
+                Réinitialiser la recherche
+              </button>
+            }
+          </div>
+        } @else {
+          <!-- Appointments Cards Grid -->
+          <div class="row g-3">
+            @for (appointment of filteredAppointments; track appointment.id) {
+              <div class="col-12 col-lg-6 col-xxl-4">
+                <div
+                  class="appointment-card h-100 p-3 rounded-3 border d-flex flex-column justify-content-between shadow-sm"
+                  [class.card-completed]="appointment.status === 'Passé'"
+                >
+                  <!-- Card Header: Time & Status -->
+                  <div>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <div class="time-badge d-flex align-items-center gap-1 px-2 py-1 rounded-2">
+                        <mat-icon class="small text-primary">schedule</mat-icon>
+                        <span class="fw-bold text-dark">{{ formatHour(appointment.hourStart) }}</span>
+                        @if (activeTab() === 'all' && appointment.day) {
+                          <span class="text-muted smaller ms-1">({{ appointment.day }})</span>
+                        }
+                      </div>
+
+                      <div class="status-pill">
+                        @if (appointment.status === 'Passé') {
+                          <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                            <mat-icon class="small align-middle me-1">check_circle</mat-icon>
+                            Consultation clôturée
+                          </span>
+                        } @else if (appointment.status === 'Confirmé') {
+                          <span class="badge bg-warning-subtle text-dark border border-warning-subtle px-2 py-1">
+                            <mat-icon class="small align-middle me-1">hourglass_top</mat-icon>
+                            En attente d'examen
+                          </span>
+                        } @else {
+                          <span class="badge bg-light text-secondary border px-2 py-1">
+                            {{ appointment.status }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+
+                    <!-- Patient Identity Block -->
+                    <div class="patient-profile-snippet d-flex align-items-center gap-3 p-2 rounded-2 bg-light mb-3">
+                      <div class="patient-avatar-circle">
+                        {{ getPatientInitials(appointment.patientId) }}
+                      </div>
+                      <div class="flex-grow-1 text-truncate">
+                        <div class="fw-bold text-dark text-truncate">
+                          {{ getPatientFullName(appointment.patientId) }}
+                        </div>
+                        <div class="text-muted smaller d-flex align-items-center gap-2">
+                          @if (getPatient(appointment.patientId)?.phone) {
+                            <span>
+                              <mat-icon class="smaller-icon align-middle me-1">phone</mat-icon>
+                              {{ getPatient(appointment.patientId)?.phone }}
+                            </span>
+                          }
+                          @if (getPatient(appointment.patientId)?.address) {
+                            <span>• {{ getPatient(appointment.patientId)?.address }}</span>
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Motif / Symptom Reason -->
+                    <div class="mb-3">
+                      <div class="text-muted smaller fw-semibold mb-1 d-flex align-items-center gap-1">
+                        <mat-icon class="smaller-icon text-secondary">description</mat-icon>
+                        <span>Motif exprimé par le patient :</span>
+                      </div>
+                      <div class="symptom-text-box p-2 rounded-2 border">
+                        <p class="mb-0 small text-dark">
+                          {{ appointment.descriptionSick || 'Aucun motif détaillé renseigné.' }}
+                        </p>
+                      </div>
+                    </div>
+
+                    <!-- Existing observation preview if completed -->
+                    @if (appointment.status === 'Passé' && appointment.doctorObservation) {
+                      <div class="observation-snippet p-2 rounded-2 mb-3 bg-light border-start border-3 border-success">
+                        <div class="smaller fw-semibold text-success mb-1">
+                          <mat-icon class="smaller-icon align-middle me-1">verified</mat-icon>
+                          Diagnostic & Observation :
+                        </div>
+                        <p class="mb-0 text-muted smaller line-clamp-2">
+                          {{ appointment.doctorObservation }}
+                        </p>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Card Action Footer -->
+                  <div class="card-action-footer pt-3 border-top mt-2">
+                    @if (appointment.status === 'Passé') {
+                      <button
+                        type="button"
+                        class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                        (click)="openDetailsModal(appointment)"
+                      >
+                        <mat-icon class="small">visibility</mat-icon>
+                        <span>Consulter compte-rendu & ordonnance</span>
+                      </button>
+                    } @else {
+                      <button
+                        type="button"
+                        class="btn btn-primary-action btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                        (click)="openConsultationModal(appointment)"
+                      >
+                        <mat-icon class="small">medical_services</mat-icon>
+                        <span>Réaliser la consultation & Prescrire</span>
+                      </button>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+</main>
+
+<!-- Unified Modal 1: Réaliser la Consultation Médicale -->
+@if (showConsultationModal() && activeAppointment()) {
+  <div class="modal-backdrop fade show"></div>
+  <div
+    class="modal d-block fade show"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    (click)="closeConsultationModal($event)"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content consultation-modal shadow border-0 text-start">
+        <!-- Modal Header -->
+        <div class="modal-header d-flex justify-content-between align-items-center border-bottom px-4 py-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="modal-header-icon-circle bg-primary-subtle text-primary">
+              <mat-icon>medical_services</mat-icon>
+            </div>
+            <div>
+              <h2 class="modal-title mb-0 fs-5 fw-bold text-dark">
+                Examen & Consultation Médicale
+              </h2>
+              <p class="modal-subtitle text-muted mb-0 small">
+                Patient : <strong class="text-dark">{{ getPatientFullName(activeAppointment()!.patientId) }}</strong>
+                • Heure : {{ formatHour(activeAppointment()!.hourStart) }}
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn-close"
+            [disabled]="isSubmittingConsultation()"
+            (click)="closeConsultationModal()"
+            aria-label="Fermer"
+          ></button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="modal-body p-4">
+          <!-- Patient & Motif Summary Banner -->
+          <div class="patient-recap-card p-3 rounded-3 bg-light border mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <span class="small fw-semibold text-secondary text-uppercase tracking-wider">
+                Motif initial de consultation
+              </span>
+              <span class="badge bg-white text-dark border">
+                Pôle {{ activeAppointment()!.service }}
+              </span>
+            </div>
+            <p class="mb-0 text-dark small fst-italic">
+              "{{ activeAppointment()!.descriptionSick || 'Aucun motif textuel' }}"
+            </p>
+          </div>
+
+          <form [formGroup]="consultationForm" (ngSubmit)="submitConsultation()">
+            <!-- Observation Médicale -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold text-dark small mb-1">
+                Observations cliniques, diagnostic et conseils *
+              </label>
+              <textarea
+                class="form-control"
+                rows="4"
+                formControlName="doctorObservation"
+                placeholder="Indiquez l'état clinique, l'examen physique, le diagnostic retenu et les préconisations médicales..."
+              ></textarea>
+              @if (consultationForm.get('doctorObservation')?.invalid && consultationForm.get('doctorObservation')?.touched) {
+                <div class="text-danger small mt-1">
+                  Une observation médicale détaillée est obligatoire (min. 5 caractères).
+                </div>
+              }
+            </div>
+
+            <!-- Prescription & Ordonnance Numérique -->
+            <div class="prescription-builder-section p-3 rounded-3 border bg-light mb-4">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                  <h3 class="fs-6 fw-bold text-dark mb-0 d-flex align-items-center gap-1">
+                    <mat-icon class="small text-primary">receipt_long</mat-icon>
+                    <span>Ordonnance & Traitement prescrit</span>
+                  </h3>
+                  <p class="text-muted smaller mb-0">Médicaments, examens complémentaires ou soins prescrits</p>
+                </div>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1"
+                  (click)="addMedoc()"
+                >
+                  <mat-icon class="small">add</mat-icon>
+                  <span>Ajouter une ligne</span>
+                </button>
+              </div>
+
+              <!-- Quick suggestions chips -->
+              <div class="suggestions-chips-row d-flex flex-wrap gap-1 mb-3">
+                <span class="smaller text-muted me-1 align-self-center">Suggestions :</span>
+                @for (sugg of quickSuggestions; track sugg) {
+                  <button
+                    type="button"
+                    class="btn btn-sm suggestion-chip"
+                    (click)="addQuickMedoc(sugg)"
+                    title="Cliquer pour insérer"
+                  >
+                    + {{ sugg.split('(')[0].trim() }}
+                  </button>
+                }
+              </div>
+
+              <!-- Medicine FormArray items -->
+              <div formArrayName="ordonnance" class="d-flex flex-column gap-2">
+                @for (ctrl of ordonnance.controls; let i = $index; track i) {
+                  <div class="medicine-item-row d-flex align-items-center gap-2">
+                    <span class="item-number-badge text-muted small fw-semibold">{{ i + 1 }}.</span>
+                    <div class="flex-grow-1">
+                      <input
+                        type="text"
+                        class="form-control form-control-sm"
+                        [formControlName]="i"
+                        placeholder="Ex: Amoxicilline 1g — 1 cp matin et soir pendant 6 jours"
+                      >
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-outline-danger btn-sm p-1 d-flex align-items-center justify-content-center"
+                      style="width: 32px; height: 32px;"
+                      (click)="removeMedoc(i)"
+                      title="Supprimer la ligne"
+                    >
+                      <mat-icon class="small">delete</mat-icon>
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="modal-footer border-top d-flex justify-content-between align-items-center px-4 py-3">
+          <button
+            type="button"
+            class="btn btn-light border btn-sm px-3"
+            [disabled]="isSubmittingConsultation()"
+            (click)="closeConsultationModal()"
+          >
+            Annuler
+          </button>
+
+          <button
+            type="button"
+            class="btn btn-primary-submit btn-sm px-4 d-flex align-items-center gap-2"
+            [disabled]="consultationForm.invalid || isSubmittingConsultation()"
+            (click)="submitConsultation()"
+          >
+            @if (isSubmittingConsultation()) {
+              <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+              <span>Enregistrement...</span>
+            } @else {
+              <mat-icon class="small">check_circle</mat-icon>
+              <span>Clôturer la consultation & Valider l'ordonnance</span>
+            }
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Unified Modal 2: Visualisation Compte-Rendu & Ordonnance (Read-Only) -->
+@if (showDetailsModal() && activeAppointment()) {
+  <div class="modal-backdrop fade show"></div>
+  <div
+    class="modal d-block fade show"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    (click)="closeDetailsModal($event)"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content shadow border-0 text-start">
+        <!-- Header -->
+        <div class="modal-header d-flex justify-content-between align-items-center border-bottom px-4 py-3">
+          <div class="d-flex align-items-center gap-3">
+            <div class="modal-header-icon-circle bg-success-subtle text-success">
+              <mat-icon>verified</mat-icon>
+            </div>
+            <div>
+              <h2 class="modal-title mb-0 fs-5 fw-bold text-dark">
+                Compte-Rendu de Consultation Médicale
+              </h2>
+              <p class="modal-subtitle text-muted mb-0 small">
+                Consultation du {{ activeAppointment()!.day }} à {{ formatHour(activeAppointment()!.hourStart) }}
+              </p>
+            </div>
+          </div>
+          <button type="button" class="btn-close" (click)="closeDetailsModal()" aria-label="Fermer"></button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body p-4" id="printable-record">
+          <!-- Medical Clinic Header Sheet -->
+          <div class="p-3 rounded-3 bg-light border mb-4 d-flex justify-content-between align-items-start">
+            <div>
+              <div class="fw-bold text-dark">Centre Médical Medico Dakar</div>
+              <div class="text-muted smaller">Dr. {{ currentUser()?.fullName }} — {{ activeAppointment()!.service }}</div>
+              <div class="text-muted smaller">Avenue Cheikh Anta Diop, Dakar • Urgences : +221 77 123 45 67</div>
+            </div>
+            <div class="text-end">
+              <span class="badge bg-success-subtle text-success border border-success-subtle px-2 py-1">
+                Consultation validée
+              </span>
+              <div class="smaller text-muted mt-1">Dossier #{{ activeAppointment()!.id.substring(0, 8) }}</div>
+            </div>
+          </div>
+
+          <!-- Patient Identity -->
+          <div class="row g-3 mb-4">
+            <div class="col-sm-6">
+              <div class="p-2 rounded-2 border">
+                <span class="text-muted smaller fw-bold d-block text-uppercase">Patient</span>
+                <span class="fw-semibold text-dark">{{ getPatientFullName(activeAppointment()!.patientId) }}</span>
+                <div class="smaller text-muted">
+                  Tél : {{ getPatient(activeAppointment()!.patientId)?.phone || 'Non renseigné' }}
+                </div>
+              </div>
+            </div>
+            <div class="col-sm-6">
+              <div class="p-2 rounded-2 border">
+                <span class="text-muted smaller fw-bold d-block text-uppercase">Motif Initial</span>
+                <span class="text-dark small">{{ activeAppointment()!.descriptionSick || 'Non spécifié' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Observation Section -->
+          <div class="mb-4">
+            <h3 class="fs-6 fw-bold text-dark mb-2 d-flex align-items-center gap-1">
+              <mat-icon class="small text-primary">notes</mat-icon>
+              <span>Observations Cliniques & Diagnostic</span>
+            </h3>
+            <div class="p-3 rounded-3 bg-light border">
+              <p class="mb-0 text-dark small" style="white-space: pre-line;">
+                {{ activeAppointment()!.doctorObservation || 'Aucune observation enregistrée.' }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Ordonnance Section -->
+          <div>
+            <h3 class="fs-6 fw-bold text-dark mb-2 d-flex align-items-center gap-1">
+              <mat-icon class="small text-primary">receipt_long</mat-icon>
+              <span>Ordonnance Médicale Délivrée</span>
+            </h3>
+            <div class="p-3 rounded-3 bg-white border">
+              @if ((activeAppointment()!.ordonnance || activeAppointment()!.orrdonnance || []).length === 0) {
+                <p class="text-muted small mb-0 fst-italic">Aucun médicament prescrit pour cette consultation.</p>
+              } @else {
+                <ul class="list-group list-group-flush mb-0">
+                  @for (med of (activeAppointment()!.ordonnance || activeAppointment()!.orrdonnance || []); track med) {
+                    <li class="list-group-item px-0 py-2 d-flex align-items-center gap-2">
+                      <mat-icon class="small text-success">check</mat-icon>
+                      <span class="fw-medium text-dark small">{{ med }}</span>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer border-top d-flex justify-content-between align-items-center px-4 py-3">
+          <button type="button" class="btn btn-outline-secondary btn-sm" (click)="closeDetailsModal()">
+            Fermer
+          </button>
+          <button type="button" class="btn btn-primary-submit btn-sm d-flex align-items-center gap-2" (click)="openConsultationModal(activeAppointment()!)">
+            <mat-icon class="small">edit</mat-icon>
+            <span>Modifier la consultation</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 <app-footer-doctor></app-footer-doctor>

@@ -1,7 +1,238 @@
 <app-navbar-doctor></app-navbar-doctor>
 
-<div class="main">
+<main class="doctor-prescriptions-main py-4">
+  <div class="container">
+    <!-- Header Card -->
+    <div class="prescriptions-header-card p-4 rounded-4 mb-4 shadow-sm border bg-white">
+      <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center gap-3">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-1">
+            <div class="header-icon-box bg-teal-subtle text-teal">
+              <mat-icon>receipt_long</mat-icon>
+            </div>
+            <h1 class="page-title mb-0">Registre des Ordonnances Médicales</h1>
+          </div>
+          <p class="text-muted small mb-0">
+            Traçabilité des traitements prescrits par Dr. {{ currentUser()?.fullName || 'Praticien' }} • Édition & Impression
+          </p>
+        </div>
 
-</div>
+        <!-- Search Bar -->
+        <div class="search-box-wrapper">
+          <div class="input-group">
+            <span class="input-group-text bg-light border-end-0">
+              <mat-icon class="small text-muted">search</mat-icon>
+            </span>
+            <input
+              type="text"
+              class="form-control form-control-sm border-start-0 ps-0"
+              placeholder="Rechercher médicament, patient, date..."
+              [value]="searchQuery()"
+              (input)="searchQuery.set($any($event.target).value)"
+            >
+            @if (searchQuery()) {
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary border-start-0"
+                (click)="searchQuery.set('')"
+                title="Effacer"
+              >
+                <mat-icon class="small">close</mat-icon>
+              </button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content Area -->
+    @if (isLoading()) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary mb-3" role="status"></div>
+        <p class="text-muted small">Chargement des ordonnances délivrées...</p>
+      </div>
+    } @else if (filteredPrescriptions.length === 0) {
+      <div class="empty-state-card text-center py-5 bg-white border rounded-4 shadow-sm p-4">
+        <div class="empty-icon-box mx-auto mb-3">
+          <mat-icon>receipt</mat-icon>
+        </div>
+        <h3 class="fs-5 fw-bold text-dark mb-1">Aucune ordonnance trouvée</h3>
+        <p class="text-muted small mb-0">
+          @if (searchQuery()) {
+            Aucune ordonnance ne correspond à "{{ searchQuery() }}".
+          } @else {
+            Aucune prescription n'a encore été enregistrée dans vos consultations.
+          }
+        </p>
+      </div>
+    } @else {
+      <!-- Prescriptions Grid -->
+      <div class="row g-3">
+        @for (item of filteredPrescriptions; track item.appointment.id) {
+          <div class="col-12 col-lg-6 col-xl-4">
+            <div class="prescription-card p-3 rounded-3 border bg-white shadow-sm h-100 d-flex flex-column justify-content-between">
+              <div>
+                <!-- Top Row: Date & Number -->
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <span class="badge bg-light text-dark border d-flex align-items-center gap-1">
+                    <mat-icon class="tiny-icon text-primary">calendar_today</mat-icon>
+                    <span>{{ item.appointment.day }}</span>
+                  </span>
+                  <span class="badge count-badge">
+                    {{ item.medications.length }} ligne{{ item.medications.length > 1 ? 's' : '' }}
+                  </span>
+                </div>
+
+                <!-- Patient Snippet -->
+                <div class="d-flex align-items-center gap-3 p-2 rounded-2 bg-light mb-3">
+                  <div class="patient-avatar-circle">
+                    {{ getPatientInitials(item.patient) }}
+                  </div>
+                  <div class="text-truncate">
+                    <div class="fw-bold text-dark text-truncate">
+                      {{ item.patient ? (item.patient.firstName + ' ' + item.patient.lastName) : 'Patient Medico' }}
+                    </div>
+                    <div class="text-muted smaller">
+                      Tél : {{ item.patient?.phone || 'Non renseigné' }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Diagnosis Reminder -->
+                @if (item.appointment.doctorObservation) {
+                  <div class="mb-3">
+                    <span class="text-muted smaller fw-bold d-block text-uppercase mb-1">Diagnostic associé</span>
+                    <p class="text-dark small mb-0 line-clamp-2 fst-italic">
+                      "{{ item.appointment.doctorObservation }}"
+                    </p>
+                  </div>
+                }
+
+                <!-- Prescribed Items List -->
+                <div class="medications-block p-2 rounded-2 border mb-3">
+                  <span class="text-teal smaller fw-bold d-block mb-1">
+                    <mat-icon class="tiny-icon align-middle me-1">medication</mat-icon>
+                    Médicaments & Posologies :
+                  </span>
+                  <ul class="list-unstyled mb-0 d-flex flex-column gap-1">
+                    @for (med of item.medications; track med) {
+                      <li class="smaller text-dark d-flex align-items-start gap-1">
+                        <mat-icon class="tiny-icon text-success mt-1">check_circle</mat-icon>
+                        <span>{{ med }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Card Action Button -->
+              <div class="pt-2 border-top">
+                <button
+                  type="button"
+                  class="btn btn-outline-primary btn-sm w-100 d-flex align-items-center justify-content-center gap-2"
+                  (click)="openPrintModal(item)"
+                >
+                  <mat-icon class="small">print</mat-icon>
+                  <span>Afficher l'ordonnance & Imprimer</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</main>
+
+<!-- Printable Prescription Sheet Modal -->
+@if (showPrintModal() && selectedPrescription()) {
+  <div class="modal-backdrop fade show"></div>
+  <div
+    class="modal d-block fade show"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    (click)="closePrintModal($event)"
+  >
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document" (click)="$event.stopPropagation()">
+      <div class="modal-content shadow border-0 text-start">
+        <div class="modal-header d-flex justify-content-between align-items-center border-bottom px-4 py-3 print-hide">
+          <div class="d-flex align-items-center gap-2">
+            <mat-icon class="text-teal">receipt_long</mat-icon>
+            <h2 class="modal-title mb-0 fs-5 fw-bold text-dark">Ordonnance Médicale Numérique</h2>
+          </div>
+          <button type="button" class="btn-close" (click)="closePrintModal()"></button>
+        </div>
+
+        <div class="modal-body p-4" id="official-prescription-sheet">
+          <!-- Official Clinic Header -->
+          <div class="border-bottom pb-3 mb-4 d-flex justify-content-between align-items-start">
+            <div>
+              <h2 class="fs-4 fw-bold text-dark mb-0">CENTRE MÉDICAL MEDICO</h2>
+              <div class="text-primary fw-semibold small">Cabinet de Consultation & Soins Spécialisés</div>
+              <div class="text-muted smaller">Avenue Cheikh Anta Diop, Dakar • Téléphone : +221 33 824 00 00</div>
+            </div>
+            <div class="text-end">
+              <div class="fw-bold text-dark">Dr. {{ currentUser()?.fullName }}</div>
+              <div class="text-muted small">{{ currentUser()?.service || 'Médecine Générale' }}</div>
+              <div class="smaller text-muted">Dakar, le {{ selectedPrescription()!.appointment.day }}</div>
+            </div>
+          </div>
+
+          <!-- Patient Identity Box -->
+          <div class="p-3 rounded-2 bg-light border mb-4 d-flex justify-content-between align-items-center">
+            <div>
+              <span class="text-muted smaller text-uppercase fw-bold d-block">Ordonnance délivrée à :</span>
+              <span class="fs-6 fw-bold text-dark">
+                {{ selectedPrescription()!.patient ? (selectedPrescription()!.patient!.firstName + ' ' + selectedPrescription()!.patient!.lastName) : 'Patient Medico' }}
+              </span>
+              @if (selectedPrescription()!.patient?.phone) {
+                <div class="smaller text-muted">Tél : {{ selectedPrescription()!.patient?.phone }}</div>
+              }
+            </div>
+            <div class="text-end">
+              <span class="badge bg-white text-dark border">Réf : ORD-{{ selectedPrescription()!.appointment.id.substring(0, 8).toUpperCase() }}</span>
+            </div>
+          </div>
+
+          <!-- Prescriptions Body -->
+          <div class="my-4 py-2">
+            <h3 class="fs-6 fw-bold text-dark mb-3 text-uppercase border-bottom pb-2">
+              Prescription Thérapeutique
+            </h3>
+
+            <div class="d-flex flex-column gap-3">
+              @for (med of selectedPrescription()!.medications; let i = $index; track i) {
+                <div class="prescription-line d-flex align-items-start gap-2">
+                  <span class="fw-bold text-teal me-2">{{ i + 1 }}.</span>
+                  <div class="fw-medium text-dark">{{ med }}</div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Doctor Signature Box -->
+          <div class="mt-5 pt-4 d-flex justify-content-end">
+            <div class="text-center" style="min-width: 200px;">
+              <div class="smaller text-muted mb-2">Signature & Cachet du Médecin :</div>
+              <div class="p-3 border rounded-2 bg-light font-monospace small text-primary fw-bold">
+                Dr. {{ currentUser()?.fullName }}<br>
+                <span class="smaller text-muted">Matricule Médical Medico</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer border-top d-flex justify-content-between align-items-center px-4 py-3 print-hide">
+          <button type="button" class="btn btn-secondary btn-sm" (click)="closePrintModal()">Fermer</button>
+          <button type="button" class="btn btn-primary-action btn-sm d-flex align-items-center gap-2" (click)="printCurrent()">
+            <mat-icon class="small">print</mat-icon>
+            <span>Imprimer l'ordonnance</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
 
 <app-footer-doctor></app-footer-doctor>

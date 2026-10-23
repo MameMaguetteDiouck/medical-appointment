@@ -22,8 +22,15 @@ nav div div form input{
 
 nav div a, nav div div ul li a{
     color: white;
+    text-decoration: none;
 }
 
 nav div a:hover, nav div div ul li a:hover{
-    color: black;
+    color: #f8f9fa;
+    text-decoration: none;
+}
+
+.nav-link.active {
+    color: #ffffff !important;
+    font-weight: 600;
 }

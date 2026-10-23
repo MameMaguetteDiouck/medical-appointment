@@ -1,13 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { materialImports } from '../../../material.imports';
 import { AuthService } from '../../../shared/services/auth.service';
-import { PatientService } from '../../../shared/services/patient.service';
-import { DoctorService } from '../../../shared/services/doctor.service';
-import { user } from '@angular/fire/auth';
-import { SecretaryService } from '../../../shared/services/secretary.service';
 
 @Component({
   selector: 'app-sign-in',
@@ -15,172 +11,85 @@ import { SecretaryService } from '../../../shared/services/secretary.service';
   templateUrl: './sign-in.component.html',
   styleUrl: './sign-in.component.css'
 })
-export class SignInComponent {
-  authForm!: FormGroup;
+export class SignInComponent implements OnInit {
+  private authService = inject(AuthService);
+  private router = inject(Router);
 
-  authService = inject(AuthService);
-  patientService = inject(PatientService);
-  doctorService = inject(DoctorService);
-  secretaryService = inject(SecretaryService);
-  router = inject(Router);
-  patientRole: string = 'patients';
-  doctorRole: string = 'doctors';
-  secretaryRole: string = 'secretaries';
-  patternPass: string = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-=\\[\\]{};:\'",.<>/?]).{8,}$';
+  authForm = new FormGroup({
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required])
+  });
 
-  isSubmissionInProgress: boolean = false;
-  isPatient: boolean = false;
-  isDoctor: boolean = false;
-  welcome: boolean = true;
-  errorMessage: string = '';
+  isSubmissionInProgress = signal<boolean>(false);
+  errorMessage = signal<string>('');
+  showPassword = signal<boolean>(false);
 
-  constructor() {
-    this.initForm();
-  }
-  initForm() {
-    this.authForm = new FormGroup({
-      email: new FormControl('', [Validators.required, Validators.email]),
-      password: new FormControl('', [Validators.required,]),
-      passwordConfirmed: new FormControl(''),
-    });
+  async ngOnInit() {
+    // Redirect if already authenticated
+    const currentUser = this.authService.currentUser;
+    if (currentUser) {
+      const role = await this.authService.getUserRole(currentUser);
+      if (role) {
+        this.router.navigate([`/${role}`]);
+      }
+    }
   }
 
-  async onSubmitEmail() {
-    this.isSubmissionInProgress = true;
-    const email = this.authForm.value.email;
-    if (!email) {
-      this.errorMessage = 'Vérifez votre saisie...';
-      this.isSubmissionInProgress = false;
+  togglePasswordVisibility() {
+    this.showPassword.update(visible => !visible);
+  }
+
+  async onSubmit() {
+    if (this.authForm.invalid) {
+      this.errorMessage.set('Veuillez renseigner un email valide et votre mot de passe.');
       return;
     }
 
-    try {
-      const userRole = await this.authService.getUserRole(email);
-
-      if (!userRole) {
-        this.errorMessage = "Vérifiez votre saisie...";
-        this.isSubmissionInProgress = false;
-        return;
-      }
-
-      if (userRole == this.secretaryRole || userRole == this.patientRole) {
-        this.welcome = false;
-        this.isPatient = true;
-        this.isSubmissionInProgress = false;
-        return;
-      }
-      if (userRole == this.doctorRole) {
-        const doctorAuth = await this.authService.userExists(email);
-        if (!doctorAuth) {
-          this.isDoctor = true;
-          this.welcome = false;
-          this.isSubmissionInProgress = false;
-        } else{
-          this.isSubmissionInProgress = false;
-          this.isPatient = true;
-          this.welcome = false;
-        }
-        return;
-      }
-    } catch (error) {
-      this.handleAuthError(error);
-    }
-  }
-  async onSubmit() {
-    if (this.authForm.invalid) return;
-
-    this.isSubmissionInProgress = true;
-    const { email, password } = this.authForm.value;
+    this.isSubmissionInProgress.set(true);
+    this.errorMessage.set('');
+    const rawEmail = this.authForm.value.email || '';
+    const email = rawEmail.trim().toLowerCase();
+    const password = this.authForm.value.password || '';
 
     try {
       const user = await this.authService.signIn(email, password);
 
       if (!user) {
-        this.errorMessage = "Erreur de connexion.";
-        this.isSubmissionInProgress = false;
+        this.errorMessage.set('Identifiants invalides.');
+        this.isSubmissionInProgress.set(false);
         return;
       }
 
-      // Récupérer le rôle de l'utilisateur depuis AuthService
-      const userRole = await this.authService.getUserRole(email);
-
-      if (userRole) {
-        console.log(`Utilisateur connecté avec le rôle: ${userRole}`);
-        // Rediriger vers la route correspondant au rôle
-        this.router.navigate([`/${userRole}`]);
-      } else {
-        this.errorMessage = "Aucun rôle trouvé pour cet utilisateur.";
-      }
-
-    } catch (error) {
-      this.handleAuthError(error);
-    } finally {
-      this.isSubmissionInProgress = false;
-    }
-  }
-  async onSubmitDoctor() {
-    if (this.authForm.get('email')?.invalid || this.authForm.get('password')?.errors?.['required']) {
-      console.log('erreur saisie requis');
-      this.errorMessage = 'Le password est requis...';
-      return;
-    }
-
-    this.isSubmissionInProgress = true;
-
-    const { email, password, passwordConfirmed } = this.authForm.value;
-    const passwordControl = this.authForm.get('password');
-
-    if (passwordControl?.errors?.['pattern']) {
-      console.log('error pattern', password);
-      this.errorMessage = 'Le mot de passe doit contenir : au moins 8 caractères, une lettre majuscule, une lettre minuscule, un chiffre et un caractère spécial.';
-      this.isSubmissionInProgress = false;
-      return;
-    }
-
-    if (password !== passwordConfirmed) {
-      this.errorMessage = 'Veuillez verifier les mots de pass...'
-      this.isSubmissionInProgress = false;
-      return;
-    }
-    try{
-      const user = await this.authService.signUp(email, password, this.doctorRole);
-
-      if (!user) {
-        this.errorMessage = "Erreur de connexion.";
-        this.isSubmissionInProgress = false;
-        return;
-      }
-
-      const userRole = await this.authService.getUserRole(email);
+      const userRole = await this.authService.getUserRole(user);
 
       if (userRole) {
         this.router.navigate([`/${userRole}`]);
       } else {
-        this.errorMessage = "Aucun rôle trouvé pour cet utilisateur.";
+        this.errorMessage.set('Aucun profil associé à ce compte.');
       }
-
-    } catch (error) {
+    } catch (error: any) {
       this.handleAuthError(error);
     } finally {
-      this.isSubmissionInProgress = false;
+      this.isSubmissionInProgress.set(false);
     }
   }
 
-  handleAuthError(error: any) {
-    console.error('Erreur:', error);
-
-    const code = error.code;
-
+  private handleAuthError(error: any) {
+    const code = error?.code || '';
     if (code === 'auth/invalid-email') {
-      this.errorMessage = 'L\'email n\'est pas valide.';
-    } else if (code === 'auth/invalid-credential' || code === 'auth/wrong-password') {
-      this.errorMessage = 'Email ou mot de passe invalide.';
-    } else if (code === 'auth/weak-password') {
-      this.errorMessage = 'Mot de passe trop faible.';
-    } else if (code === 'auth/email-already-in-use') {
-      this.errorMessage = 'Cet email est déjà utilisé.';
+      this.errorMessage.set("L'adresse email saisie n'est pas valide.");
+    } else if (
+      code === 'auth/invalid-credential' ||
+      code === 'auth/wrong-password' ||
+      code === 'auth/user-not-found'
+    ) {
+      this.errorMessage.set('Email ou mot de passe incorrect.');
+    } else if (code === 'auth/too-many-requests') {
+      this.errorMessage.set('Trop de tentatives infructueuses. Veuillez patienter quelques instants.');
+    } else if (code === 'auth/user-disabled') {
+      this.errorMessage.set('Ce compte utilisateur a été désactivé par l\'administration.');
     } else {
-      this.errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
+      this.errorMessage.set('Une erreur est survenue lors de la connexion. Veuillez réessayer.');
     }
   }
 }

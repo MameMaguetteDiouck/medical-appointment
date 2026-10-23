@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import {
   addDoc,
+  setDoc,
   collection,
   CollectionReference,
   Firestore,
@@ -27,9 +28,14 @@ export class PatientService {
   }
 
   /**
-   * Ajoute un patient à Firestore
+   * Adds or sets a patient document in Firestore.
+   * If patientData.id is provided (Auth UID), it uses setDoc to ensure direct UID alignment.
    */
   addPatient(patientData: Patient) {
+    if (patientData.id) {
+      const docRef = doc(this.firestore, 'patients', patientData.id);
+      return setDoc(docRef, patientData);
+    }
     return addDoc(this.patientRef, patientData);
   }
 

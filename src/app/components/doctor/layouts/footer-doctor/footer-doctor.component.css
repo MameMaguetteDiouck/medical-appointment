@@ -1,13 +1,3 @@
-footer{
-    background-color: #566573;
-    color: white;
-}
-
-footer div div p a{
-    text-decoration: none;
-    color: white;
-}
-footer div div p a:hover{
-    text-decoration: none;
-    color: black;
+:host {
+  display: block;
 }
