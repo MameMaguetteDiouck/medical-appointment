@@ -6,6 +6,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -13,7 +14,20 @@ import {
   orderBy,
   CollectionReference
 } from '@angular/fire/firestore';
+import { initializeApp, deleteApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
+import { environment } from '../../../environments/environment';
 import { Doctor } from '../interfaces/doctor';
+
+export function generateSecureTemporaryPassword(): string {
+  const charset = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$';
+  const randomValues = new Uint8Array(8);
+  crypto.getRandomValues(randomValues);
+  const randomStr = Array.from(randomValues).map(byte => charset[byte % charset.length]).join('');
+  return `Med-${randomStr}9!`;
+}
+
+export const DEFAULT_DOCTOR_PASSWORD = 'Medico2026!';
 
 @Injectable({
   providedIn: 'root'
@@ -27,8 +41,47 @@ export class DoctorService {
   }
 
 
-  async addDoctor(doctor: Doctor) {
-    return addDoc(this.doctorRef, doctor);
+  /**
+   * Adds a new doctor, automatically provisioning their Firebase Auth credentials
+   * with a cryptographically secure temporary password and forcing a password update on first login.
+   */
+  async addDoctor(doctor: Doctor, initialPassword?: string): Promise<{ uid: string; defaultPassword: string }> {
+    const passwordToUse = initialPassword || generateSecureTemporaryPassword();
+    const appName = `doctor-provisioning-${Date.now()}`;
+    const secondaryApp = initializeApp(environment.firebaseConfig, appName);
+    const secondaryAuth = getAuth(secondaryApp);
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(secondaryAuth, doctor.email, passwordToUse);
+      const uid = userCredential.user.uid;
+
+      // Clean up secondary auth session immediately
+      await signOut(secondaryAuth);
+      await deleteApp(secondaryApp);
+
+      const doctorData: Doctor = {
+        ...doctor,
+        id: uid,
+        mustChangePassword: true,
+        status: doctor.status || 'active'
+      };
+
+      const docRef = doc(this.doctorRef, uid);
+      await setDoc(docRef, doctorData);
+
+      return { uid, defaultPassword: passwordToUse };
+    } catch (error: any) {
+      try {
+        await deleteApp(secondaryApp);
+      } catch (cleanupErr) {
+        // App cleanup
+      }
+
+      if (error?.code === 'auth/email-already-in-use') {
+        throw new Error(`L'adresse email ${doctor.email} possède déjà un compte de connexion.`);
+      }
+      throw error;
+    }
   }
 
 
@@ -147,9 +200,19 @@ export class DoctorService {
         return doctor;
       })
       .filter(doctor => {
-        const match = this.isTimeInRange(time, doctor.startTime, doctor.endTime);
+        // Exclude doctors who are on leave or inactive
+        if (doctor.status && doctor.status !== 'active') {
+          return false;
+        }
+
+        // Check day-specific schedule if available, otherwise fallback to global times
+        const daySchedule = doctor.weeklySchedule?.[day];
+        const start = daySchedule?.startTime || doctor.startTime;
+        const end = daySchedule?.endTime || doctor.endTime;
+
+        const match = this.isTimeInRange(time, start, end);
         console.log(
-          `→ Docteur ${doctor.fullName} : ${doctor.startTime} - ${doctor.endTime}, Heure demandée : ${time}, Correspond : ${match}`
+          `→ Docteur ${doctor.fullName} (${day}) : ${start} - ${end}, Heure demandée : ${time}, Correspond : ${match}`
         );
         return match;
       });

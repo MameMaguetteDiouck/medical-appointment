@@ -1,0 +1,134 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================================
+    // Authentication & Role Helper Functions
+    // =========================================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasRole(role) {
+      return isAuthenticated() && (
+        request.auth.token.role == role ||
+        exists(/databases/$(database)/documents/$(role)/$(request.auth.uid))
+      );
+    }
+
+    function isDoctor() {
+      return hasRole('doctors');
+    }
+
+    function isSecretary() {
+      return hasRole('secretaries');
+    }
+
+    function isStaff() {
+      return isDoctor() || isSecretary();
+    }
+
+    // =========================================================================
+    // Patients Collection Rules
+    // =========================================================================
+    // Patients have access to their personal medical profile.
+    // Doctors and secretaries can view records for clinical continuity.
+    match /patients/{patientId} {
+      allow read: if isOwner(patientId) || isStaff();
+
+      allow create: if isOwner(patientId) && (
+        request.resource.data.email == request.auth.token.email ||
+        !('email' in request.resource.data)
+      ) || isSecretary();
+
+      allow update: if (
+        isOwner(patientId) &&
+        // Prevent patients from self-escalating role status
+        request.resource.data.id == resource.data.id
+      ) || isSecretary();
+
+      allow delete: if isSecretary();
+    }
+
+    // =========================================================================
+    // Doctors Collection Rules
+    // =========================================================================
+    // Public directory of practitioners is visible to authenticated users
+    // so patients can review specialties and request preferred doctors.
+    match /doctors/{doctorId} {
+      allow read: if isAuthenticated();
+      allow create, delete: if isSecretary();
+      allow update: if isOwner(doctorId) || isSecretary();
+    }
+
+    // =========================================================================
+    // Secretaries Collection Rules
+    // =========================================================================
+    // Restricted administrative profiles.
+    match /secretaries/{secretaryId} {
+      allow read: if isOwner(secretaryId) || isSecretary();
+      allow create, update: if isOwner(secretaryId) || isSecretary();
+      allow delete: if isSecretary();
+    }
+
+    // =========================================================================
+    // Appointments & Clinical Records Rules
+    // =========================================================================
+    // Protects patient appointments, medical observations and official prescriptions.
+    match /appointments/{appointmentId} {
+      
+      // Read access: The patient who booked, or any practitioner/secretary on duty
+      allow read: if isAuthenticated() && (
+        resource.data.patientId == request.auth.uid ||
+        resource.data.doctorId == request.auth.uid ||
+        isStaff()
+      );
+
+      // Create access:
+      // - Patient can book for themselves with PENDING status and empty medical notes.
+      // - Secretary can schedule an appointment for any patient.
+      allow create: if isAuthenticated() && (
+        (
+          request.resource.data.patientId == request.auth.uid &&
+          request.resource.data.status == 'Attente de confirmation' &&
+          (!('doctorObservation' in request.resource.data) || request.resource.data.doctorObservation == '') &&
+          (!('ordonnance' in request.resource.data) || request.resource.data.ordonnance.size() == 0) &&
+          (!('orrdonnance' in request.resource.data) || request.resource.data.orrdonnance.size() == 0)
+        ) ||
+        isSecretary()
+      );
+
+      // Update access:
+      // - Patients can only update non-clinical fields on their own uncompleted appointments.
+      // - Doctors and secretaries can update schedules, observations, prescriptions and statuses.
+      allow update: if isAuthenticated() && (
+        (
+          // Patient updating their own appointment (cannot alter prescription or doctor observation)
+          resource.data.patientId == request.auth.uid &&
+          resource.data.status != 'Passé' &&
+          request.resource.data.patientId == resource.data.patientId &&
+          request.resource.data.doctorObservation == resource.data.doctorObservation &&
+          (!('ordonnance' in resource.data) || request.resource.data.ordonnance == resource.data.ordonnance) &&
+          (!('orrdonnance' in resource.data) || request.resource.data.orrdonnance == resource.data.orrdonnance)
+        ) ||
+        isStaff()
+      );
+
+      // Delete access: Restricted to secretaries for non-completed appointments.
+      allow delete: if isSecretary() && resource.data.status != 'Passé';
+    }
+
+    // =========================================================================
+    // Default Deny Fallback
+    // =========================================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
