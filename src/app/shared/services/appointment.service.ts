@@ -30,8 +30,12 @@ export class AppointmentService {
     return addDoc(this.appointmentRef, data);
   }
 
-  async allAppointmentForOnePatient(id: string): Promise<Appointment[]> {
-    const q = query(this.appointmentRef, where('patientId', '==', id));
+  async allAppointmentForOnePatient(id: string, authUid?: string): Promise<Appointment[]> {
+    const ids = [id];
+    if (authUid && authUid !== id) {
+      ids.push(authUid);
+    }
+    const q = query(this.appointmentRef, where('patientId', 'in', ids));
     const snapshot = await getDocs(q);
 
     const appointments = snapshot.docs.map(docSnap => {
@@ -42,8 +46,12 @@ export class AppointmentService {
     const data = this.sortAppointmentsByDateDesc(appointments);
     return data;
   }
-  async allAppointmentForOneDoctor(id: string): Promise<Appointment[]> {
-    const q = query(this.appointmentRef, where('doctorId', '==', id));
+  async allAppointmentForOneDoctor(id: string, authUid?: string): Promise<Appointment[]> {
+    const ids = [id];
+    if (authUid && authUid !== id) {
+      ids.push(authUid);
+    }
+    const q = query(this.appointmentRef, where('doctorId', 'in', ids));
     const snapshot = await getDocs(q);
 
     const appointments = snapshot.docs.map(docSnap => {
@@ -133,15 +141,19 @@ export class AppointmentService {
     return data;
   }
 
-  async getAppointmentsForToday(id: string | null): Promise<Appointment[]> {
+  async getAppointmentsForToday(id: string | null, authUid?: string): Promise<Appointment[]> {
+    if (!id) return [];
     const today = new Date();
     const formattedDate = today.toISOString().split('T')[0];
+    const ids = [id];
+    if (authUid && authUid !== id) {
+      ids.push(authUid);
+    }
 
     const q = query(
       this.appointmentRef,
       where('day', '==', formattedDate),
-      where('doctorId', '==', id),
-      where('status', '==', AppointmentStatus.CONFIRMED)
+      where('doctorId', 'in', ids)
     );
 
     const snapshot = await getDocs(q);

@@ -15,5 +15,6 @@ export interface Appointment {
   doctorName: string,
   status: AppointmentStatus,
   doctorObservation: string;
-  orrdonnance: string[];
+  ordonnance?: string[];
+  orrdonnance?: string[];
 }

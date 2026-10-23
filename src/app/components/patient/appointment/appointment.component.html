@@ -1,46 +1,227 @@
 <app-navbar-patient></app-navbar-patient>
 
-<div class="main text-center">
-    <div class="d-flex justify-content-center h-100 align-items-center mt-4">
-        <div class="card w-50">
-            <h2 class="m-4">Rendez-vous à Medico</h2>
-            <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
-                <mat-form-field appearance="outline" class="w-75">
-                    <mat-label>Services</mat-label>
-                    <mat-select formControlName="service">
-                        <mat-option value="Dentiste">Dentiste</mat-option>
-                        <mat-option value="Cardiologie">Cardiologie</mat-option>
-                        <mat-option value="Neurologie">Neurologie</mat-option>
-                        <mat-option value="Orthopedie">Orthopédie</mat-option>
-                        <mat-option value="Pediatrie">Pédiatrie</mat-option>
-                        <mat-option value="Gynecologie">Gynécologie</mat-option>
-                        <mat-option value="Urgence">Urgences</mat-option>
-                        <mat-option value="Radiologie">Radiologie</mat-option>
-                        <mat-option value="Chirurgie">Chirurgie</mat-option>
-                        <mat-option value="Oncologie">Oncologie</mat-option>
-                        <mat-option value="Dermatologie">Dermatologie</mat-option>
-                    </mat-select>
-                </mat-form-field>
-                <mat-form-field appearance="outline" class="w-75">
-                    <mat-label>Dis-nous en un peu plus</mat-label>
-                    <textarea matInput formControlName="descriptionSick"></textarea>
-                </mat-form-field>
+<main class="booking-main py-4">
+  <div class="container navig">
 
-                <div class="alert alert-danger p2 d-flex align-items-center" *ngIf="errorMessage ">
-                    <mat-icon>info</mat-icon>
-                    {{errorMessage}}
-                </div>
-
-                <!-- In progess -->
-                <div class="d-flex align-items-center" *ngIf="isSubmissionInProgress">
-                    <mat-spinner [diameter]="22"></mat-spinner>
-                    Envoi en Cours...
-                </div>
-                <button class="w-75 mb-3" mat-raised-button>Primary</button>
-            </form>
-        </div>
+    <!-- Top Navigation / Breadcrumb -->
+    <div class="mb-4">
+      <a [routerLink]="['/patients']" class="btn-back-link text-decoration-none d-inline-flex align-items-center gap-2">
+        <i class="bi bi-arrow-left"></i>
+        <span>Retour à mon espace patient</span>
+      </a>
     </div>
 
-</div>
+    <!-- Header Banner -->
+    <div class="booking-header mb-4">
+      <h1 class="h3 fw-bold text-slate-800 mb-2">Prendre un rendez-vous médical</h1>
+      <p class="text-slate-600 mb-0 small">
+        Complétez les informations ci-dessous. Votre demande sera traitée et confirmée dans les meilleurs délais par notre secrétariat médical.
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Main Booking Form (Col 8) -->
+      <div class="col-12 col-lg-8">
+        <div class="booking-form-card bg-white border rounded-4 p-4 p-md-5 shadow-sm">
+          
+          <form [formGroup]="appointmentForm" (ngSubmit)="onSubmit()">
+            
+            <!-- Step 1: Specialty Selection -->
+            <div class="booking-step mb-4">
+              <label class="form-step-label mb-2">
+                <span class="step-number">1</span>
+                <span>Pôle de soins ou spécialité médicale <span class="text-danger">*</span></span>
+              </label>
+              <p class="text-muted small mb-3">Sélectionnez le service médical adapté à votre besoin :</p>
+              
+              <!-- Quick Select Badges / Chips -->
+              <div class="specialty-chips-grid mb-3">
+                @for (spec of specialties; track spec.value) {
+                  <button
+                    type="button"
+                    class="specialty-chip-btn"
+                    [class.selected]="appointmentForm.get('service')?.value === spec.value"
+                    (click)="selectSpecialty(spec.value)">
+                    <i class="bi" [ngClass]="spec.icon"></i>
+                    <span>{{ spec.label }}</span>
+                  </button>
+                }
+              </div>
+
+              <!-- Form Validation Feedback -->
+              @if (appointmentForm.get('service')?.touched && appointmentForm.get('service')?.invalid) {
+                <div class="text-danger small mt-1">
+                  <i class="bi bi-exclamation-circle me-1"></i> Veuillez sélectionner une spécialité médicale.
+                </div>
+              }
+            </div>
+
+            <!-- Step 2: Preferred Doctor -->
+            <div class="booking-step mb-4">
+              <label class="form-step-label mb-2" for="doctorSelect">
+                <span class="step-number">2</span>
+                <span>Médecin praticien souhaité <span class="text-muted fw-normal">(optionnel)</span></span>
+              </label>
+              <p class="text-muted small mb-2">Vous pouvez choisir un médecin en particulier ou laisser le secrétariat attribuer le premier créneau disponible :</p>
+              
+              <select id="doctorSelect" class="form-select custom-select-input" formControlName="doctorId">
+                <option value="">Premier praticien disponible (recommandé)</option>
+                @for (doc of availableDoctorsForService; track doc.id) {
+                  <option [value]="doc.id">
+                    {{ doc.fullName || doc.doctorName }} — {{ doc.service }}
+                  </option>
+                }
+              </select>
+            </div>
+
+            <!-- Step 3: Preferred Date -->
+            <div class="booking-step mb-4">
+              <label class="form-step-label mb-2" for="appointmentDay">
+                <span class="step-number">3</span>
+                <span>Date souhaitée pour la consultation <span class="text-danger">*</span></span>
+              </label>
+              <p class="text-muted small mb-2">Choisissez la date à laquelle vous souhaitez vous rendre au centre médical :</p>
+              
+              <div class="input-group">
+                <span class="input-group-text bg-slate-subtle border-end-0">
+                  <i class="bi bi-calendar-event text-slate-primary"></i>
+                </span>
+                <input
+                  id="appointmentDay"
+                  type="date"
+                  class="form-control custom-date-input border-start-0"
+                  formControlName="day"
+                  [min]="minDate"
+                />
+              </div>
+
+              @if (appointmentForm.get('day')?.touched && appointmentForm.get('day')?.invalid) {
+                <div class="text-danger small mt-1">
+                  <i class="bi bi-exclamation-circle me-1"></i> Veuillez indiquer une date de consultation valide.
+                </div>
+              }
+            </div>
+
+            <!-- Step 4: Motive & Symptoms -->
+            <div class="booking-step mb-4">
+              <label class="form-step-label mb-2" for="motiveDescription">
+                <span class="step-number">4</span>
+                <span>Motif de consultation & symptômes <span class="text-danger">*</span></span>
+              </label>
+              <p class="text-muted small mb-2">Décrivez brièvement vos symptômes ou l'objet de la visite (ex: fièvre depuis 3 jours, contrôle tension, douleur dentaire...) :</p>
+              
+              <textarea
+                id="motiveDescription"
+                class="form-control custom-textarea"
+                rows="4"
+                formControlName="descriptionSick"
+                placeholder="Indiquez ici les détails utiles à votre prise en charge..."
+              ></textarea>
+
+              @if (appointmentForm.get('descriptionSick')?.touched && appointmentForm.get('descriptionSick')?.invalid) {
+                <div class="text-danger small mt-1">
+                  <i class="bi bi-exclamation-circle me-1"></i> Veuillez renseigner le motif de votre consultation (au moins 5 caractères).
+                </div>
+              }
+            </div>
+
+            <!-- Error Banner -->
+            @if (errorMessage()) {
+              <div class="alert alert-danger d-flex align-items-center gap-2 mb-4" role="alert">
+                <i class="bi bi-exclamation-triangle-fill flex-shrink-0"></i>
+                <div class="small">{{ errorMessage() }}</div>
+              </div>
+            }
+
+            <!-- Submit Section -->
+            <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center justify-content-between gap-3 pt-3 border-top">
+              <a [routerLink]="['/patients']" class="btn btn-outline-secondary order-2 order-sm-1">
+                Annuler
+              </a>
+              
+              <button
+                type="submit"
+                class="btn btn-primary-action d-inline-flex align-items-center justify-content-center gap-2 order-1 order-sm-2"
+                [disabled]="isSubmissionInProgress() || appointmentForm.invalid">
+                @if (isSubmissionInProgress()) {
+                  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                  <span>Envoi de votre demande...</span>
+                } @else {
+                  <i class="bi bi-check2-circle"></i>
+                  <span>Confirmer la demande de rendez-vous</span>
+                }
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+
+      <!-- Right Column: Summary & Guidance Card (Col 4) -->
+      <div class="col-12 col-lg-4">
+        <aside class="booking-summary-card bg-white border rounded-4 p-4 shadow-sm sticky-top" style="top: 85px;">
+          <h2 class="h6 fw-bold text-slate-800 border-bottom pb-3 mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-file-earmark-text text-slate-primary"></i>
+            <span>Récapitulatif de la demande</span>
+          </h2>
+
+          <div class="summary-details d-flex flex-column gap-3 mb-4">
+            <!-- Patient summary -->
+            <div class="summary-item">
+              <div class="text-muted small">Patient</div>
+              <div class="fw-semibold text-slate-800">
+                {{ currentUser()?.firstName || 'Patient' }} {{ currentUser()?.lastName || '' }}
+              </div>
+              <div class="small text-muted">{{ currentUser()?.email }}</div>
+            </div>
+
+            <!-- Service summary -->
+            <div class="summary-item">
+              <div class="text-muted small">Spécialité demandée</div>
+              <div class="fw-semibold text-slate-800">
+                {{ appointmentForm.get('service')?.value || 'Non sélectionnée' }}
+              </div>
+            </div>
+
+            <!-- Date summary -->
+            <div class="summary-item">
+              <div class="text-muted small">Date souhaitée</div>
+              <div class="fw-semibold text-slate-800">
+                {{ appointmentForm.get('day')?.value ? (appointmentForm.get('day')?.value | date:'EEEE dd MMMM yyyy') : 'Non renseignée' }}
+              </div>
+            </div>
+
+            <!-- Doctor summary -->
+            <div class="summary-item">
+              <div class="text-muted small">Praticien</div>
+              <div class="fw-semibold text-slate-800">
+                {{ selectedDoctorName }}
+              </div>
+            </div>
+          </div>
+
+          <!-- Medical Assistance Info Card -->
+          <div class="p-3 bg-slate-subtle rounded-3 border">
+            <div class="d-flex align-items-start gap-2 mb-2">
+              <i class="bi bi-info-circle-fill text-slate-primary fs-5"></i>
+              <div class="small fw-semibold text-slate-800">Procédure de validation</div>
+            </div>
+            <p class="small text-slate-600 mb-0">
+              Votre demande est transmise à l'accueil du centre Medico. Dès validation de l'heure exacte par le secrétariat, votre statut passera à <strong>Confirmé</strong>.
+            </p>
+          </div>
+
+          <div class="mt-3 text-center">
+            <span class="small text-muted">
+              <i class="bi bi-telephone me-1"></i> Assistance : +221 77 123 45 67
+            </span>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+  </div>
+</main>
 
 <app-footer-patient></app-footer-patient>

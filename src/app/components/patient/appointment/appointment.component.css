@@ -1,8 +1,158 @@
-div div form button:hover{
-    background-color: #566573;
-    color: white;
+/* Appointment Booking Styles - Harmonized with #566573 */
+
+:host {
+  display: block;
+  min-height: 100vh;
+  background-color: #fafbfc;
 }
-div div form button{
-    background-color: rgba(50, 53, 54, 0.274);
-    color: black;
+
+.booking-main {
+  min-height: calc(100vh - 120px);
+}
+
+/* Palette utility aliases */
+.text-slate-800 { color: #1e293b !important; }
+.text-slate-700 { color: #334155 !important; }
+.text-slate-600 { color: #475569 !important; }
+.text-slate-primary { color: #566573 !important; }
+.bg-slate-subtle { background-color: #f1f5f9 !important; }
+
+/* Back Link */
+.btn-back-link {
+  color: #566573;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-back-link:hover {
+  color: #334155;
+  transform: translateX(-3px);
+}
+
+/* Step Label & Numbering */
+.form-step-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #1e293b;
+}
+
+.step-number {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #566573;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* Specialty Chips Grid */
+.specialty-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.specialty-chip-btn {
+  background-color: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.specialty-chip-btn i {
+  font-size: 1.15rem;
+  color: #566573;
+  transition: color 0.2s ease;
+}
+
+.specialty-chip-btn:hover {
+  border-color: #cbd5e1;
+  background-color: #f8fafc;
+  color: #1e293b;
+}
+
+.specialty-chip-btn.selected {
+  background-color: #566573;
+  border-color: #566573;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(86, 101, 115, 0.25);
+}
+
+.specialty-chip-btn.selected i {
+  color: #ffffff;
+}
+
+/* Form Controls */
+.custom-select-input,
+.custom-date-input,
+.custom-textarea {
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  color: #1e293b;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.custom-select-input:focus,
+.custom-date-input:focus,
+.custom-textarea:focus {
+  border-color: #566573;
+  outline: 0;
+  box-shadow: 0 0 0 3px rgba(86, 101, 115, 0.15);
+}
+
+/* Primary Action Buttons */
+.btn-primary-action {
+  background-color: #566573 !important;
+  color: #ffffff !important;
+  border: 1px solid #566573 !important;
+  padding: 10px 24px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.btn-primary-action:hover:not(:disabled) {
+  background-color: #475461 !important;
+  border-color: #475461 !important;
+  box-shadow: 0 4px 14px rgba(86, 101, 115, 0.28);
+}
+
+.btn-primary-action:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Summary Card */
+.booking-summary-card {
+  border-color: #e2e8f0 !important;
+}
+
+.summary-item {
+  border-bottom: 1px dashed #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.summary-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
