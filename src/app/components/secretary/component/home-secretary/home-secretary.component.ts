@@ -15,9 +15,11 @@ import { PatientService } from '../../../../shared/services/patient.service';
 
 
 
+import { RouterLink } from '@angular/router';
+
 @Component({
   selector: 'app-home-secretary',
-  imports: [NavbarSecretaryComponent, FooterSecretaryComponent, materialImports, CommonModule, NgChartsModule],
+  imports: [NavbarSecretaryComponent, FooterSecretaryComponent, materialImports, CommonModule, NgChartsModule, RouterLink],
   templateUrl: './home-secretary.component.html',
   styleUrl: './home-secretary.component.css'
 })
@@ -40,33 +42,40 @@ export class HomeSecretaryComponent {
   completedStatus: string = 'Passé';
   pieChartData: any;
   barChartData: any;
+  todayFormatted: string = this.getFormattedDate();
+
   barChartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     scales: {
       y: {
         beginAtZero: true,
         ticks: {
+          stepSize: 1,
           font: {
-            size: 14
-          }
+            size: 12
+          },
+          color: '#566573'
+        },
+        grid: {
+          color: '#eef2f6'
         }
       },
       x: {
         ticks: {
           font: {
-            size: 14
-          }
+            size: 12
+          },
+          color: '#566573'
+        },
+        grid: {
+          display: false
         }
       }
     },
     plugins: {
       legend: {
-        display: true,
-        labels: {
-          font: {
-            size: 16
-          }
-        }
+        display: false
       }
     }
   };
@@ -74,24 +83,34 @@ export class HomeSecretaryComponent {
   pieChartType: ChartType = 'pie';
   pieChartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: 'bottom' as const,
         labels: {
           font: {
             size: 13,
-            weight: 'bold' as const
+            weight: 'normal' as const
           },
           color: '#566573',
+          padding: 16,
+          usePointStyle: true,
+          pointStyle: 'circle'
         }
       }
     }
   };
   barChartDataDay: any;
 
-
   em?: string | null;
-  currentUser: any = null; // ou type Patient
+  currentUser: any = null;
+
+  private getFormattedDate(): string {
+    const d = new Date();
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    const str = new Intl.DateTimeFormat('fr-FR', options).format(d);
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  }
 
   async ngOnInit() {
     this.allAppointment = await this.appointService.getAllAppointments();

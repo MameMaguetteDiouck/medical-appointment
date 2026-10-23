@@ -43,3 +43,7 @@ Thumbs.db
 .firebase
 *-debug.log
 .runtimeconfig.json
+
+# Local documentation & workflow tracking
+/docs/
+.playwright-mcp/
