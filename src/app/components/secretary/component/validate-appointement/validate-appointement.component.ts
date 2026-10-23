@@ -65,7 +65,7 @@ export class ValidateAppointementComponent {
   }
 
   closeConfirmModal(event?: MouseEvent) {
-    if (event && (event.target as HTMLElement).classList.contains('modal-dialog')) {
+    if (event && event.target !== event.currentTarget) {
       return;
     }
     this.showConfirmModal.set(false);
@@ -83,7 +83,7 @@ export class ValidateAppointementComponent {
   }
 
   closeCancelModal(event?: MouseEvent) {
-    if (event && (event.target as HTMLElement).classList.contains('modal-dialog')) {
+    if (event && event.target !== event.currentTarget) {
       return;
     }
     this.showCancelModal.set(false);

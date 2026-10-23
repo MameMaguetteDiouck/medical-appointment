@@ -327,7 +327,7 @@
 @if (showConfirmModal()) {
   <div class="modal-backdrop fade show"></div>
   <div class="modal d-block fade show" tabindex="-1" role="dialog" aria-modal="true" (click)="closeConfirmModal($event)">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document" (click)="$event.stopPropagation()">
       <div class="modal-content clean-modal shadow text-start">
         <div class="modal-header border-bottom">
           <div>
@@ -417,7 +417,7 @@
 @if (showCancelModal()) {
   <div class="modal-backdrop fade show"></div>
   <div class="modal d-block fade show" tabindex="-1" role="dialog" aria-modal="true" (click)="closeCancelModal($event)">
-    <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-dialog modal-dialog-centered" role="document" (click)="$event.stopPropagation()">
       <div class="modal-content clean-modal shadow text-start">
         <div class="modal-header border-bottom">
           <h2 class="modal-title mb-0">Annulation de rendez-vous</h2>
